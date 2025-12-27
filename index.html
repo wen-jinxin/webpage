@@ -1,607 +1,2454 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的个人日记本</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>萌萌跳跃 🐰</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Comic Sans MS', '幼圆', '微软雅黑', sans-serif;
         }
-        
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            touch-action: none;
+        }
+
         body {
-            font-family: 'Microsoft YaHei', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #fce4ec, #e1f5fe);
+        }
+
+        /* 登录注册界面样式 */
+        .auth-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #fce4ec, #e1f5fe);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
             padding: 20px;
         }
-        
-        .app-container {
-            max-width: 1200px;
-            margin: 0 auto;
+
+        .auth-box {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 8px 30px rgba(174, 129, 255, 0.2);
+            border: 2px solid #e1bee7;
         }
-        
-        .app-header {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            color: white;
-            padding: 25px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .header-title {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .header-title h1 {
+
+        .auth-title {
+            text-align: center;
+            color: #7b1fa2;
             font-size: 28px;
-            font-weight: bold;
+            margin-bottom: 25px;
+            text-shadow: 1px 1px 0 rgba(255,255,255,0.9);
         }
-        
-        .date-display {
-            font-size: 16px;
-            color: #ecf0f1;
-        }
-        
-        .main-content {
+
+        .auth-tabs {
             display: flex;
-            min-height: 600px;
-        }
-        
-        .sidebar {
-            width: 300px;
-            background: #f8f9fa;
-            border-right: 1px solid #dee2e6;
-            padding: 20px;
-        }
-        
-        .search-box {
-            position: relative;
             margin-bottom: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #f3e5f5;
         }
-        
-        .search-box input {
+
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #7b1fa2;
+            transition: all 0.2s ease;
+        }
+
+        .auth-tab.active {
+            background: #ce93d8;
+            color: white;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            color: #6a1b9a;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .form-input {
             width: 100%;
             padding: 12px 15px;
-            border: 1px solid #dee2e6;
-            border-radius: 10px;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-        
-        .search-box input:focus {
-            outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-        }
-        
-        .search-btn {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: #7f8c8d;
-            cursor: pointer;
-        }
-        
-        .new-diary-btn {
-            width: 100%;
-            padding: 15px;
-            background: #2ecc71;
-            color: white;
-            border: none;
+            border: 2px solid #e1bee7;
             border-radius: 10px;
             font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-bottom: 20px;
-            transition: background 0.3s;
+            background: rgba(255, 255, 255, 0.8);
+            transition: all 0.2s ease;
         }
-        
-        .new-diary-btn:hover {
-            background: #27ae60;
+
+        .form-input:focus {
+            outline: none;
+            border-color: #ba68c8;
+            box-shadow: 0 0 10px rgba(186, 104, 200, 0.2);
         }
-        
-        .diary-list {
-            height: 400px;
-            overflow-y: auto;
-        }
-        
-        .diary-item {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        
-        .diary-item:hover {
-            background: #e9ecef;
-        }
-        
-        .diary-item.selected {
-            background: #3498db;
-            color: white;
-        }
-        
-        .diary-date {
+
+        .form-error {
+            color: #e53935;
             font-size: 12px;
-            color: #7f8c8d;
-            margin-bottom: 5px;
+            margin-top: 5px;
+            display: none;
         }
-        
-        .diary-title {
+
+        .form-error.show {
+            display: block;
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(to right, #ba68c8, #8e24aa);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
             font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 10px;
+        }
+
+        .auth-btn:hover {
+            background: linear-gradient(to right, #8e24aa, #ba68c8);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(186, 104, 200, 0.3);
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #7b1fa2;
             font-size: 14px;
+        }
+
+        /* 个人中心样式 */
+        .center-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 300;
+        }
+
+        .center-box {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .center-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #7b1fa2;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .center-close:hover {
+            background: #f3e5f5;
+            transform: rotate(90deg);
+        }
+
+        .center-title {
+            text-align: center;
+            color: #7b1fa2;
+            font-size: 28px;
+            margin-bottom: 25px;
+            text-shadow: 1px 1px 0 rgba(255,255,255,0.9);
+        }
+
+        .skin-section {
+            margin-top: 20px;
+        }
+
+        .skin-title {
+            color: #6a1b9a;
+            font-size: 18px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .skin-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .skin-item {
+            background: #f3e5f5;
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+        }
+
+        .skin-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(186, 104, 200, 0.3);
+        }
+
+        .skin-item.active {
+            border-color: #ba68c8;
+            background: #e1bee7;
+        }
+
+        .skin-preview {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+
+        .skin-name {
+            color: #7b1fa2;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        /* 用户信息栏 */
+        .user-info {
+            position: absolute;
+            top: 3vh;
+            right: 12vw;
+            display: flex;
+            align-items: center;
+            background: rgba(255,255,255,0.85);
+            padding: 0.5vw 1.5vw;
+            border-radius: 50px;
+            border: 2px solid #e1bee7;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            z-index: 15;
+        }
+
+        .user-avatar {
+            width: 5vw;
+            height: 5vw;
+            min-width: 30px;
+            min-height: 30px;
+            max-width: 40px;
+            max-height: 40px;
+            background: linear-gradient(135deg, #ff8fab, #f48fb1);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 2vw;
+            margin-right: 1vw;
+        }
+
+        .user-name {
+            color: #7b1fa2;
+            font-weight: bold;
+            font-size: 2vw;
+            max-width: 100px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        
-        .editor-area {
-            flex: 1;
-            padding: 30px;
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: #e53935;
+            cursor: pointer;
+            font-size: 1.8vw;
+            margin-left: 1vw;
+            transition: all 0.2s ease;
         }
-        
-        .editor-toolbar {
+
+        .logout-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* 个人中心按钮样式 */
+        .center-btn {
+            background: none;
+            border: none;
+            color: #ba68c8;
+            cursor: pointer;
+            font-size: 1.8vw;
+            margin-left: 1vw;
+            transition: all 0.2s ease;
+        }
+
+        .center-btn:hover {
+            transform: scale(1.1);
+            color: #7b1fa2;
+        }
+
+        .game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: #fff8e1;
+            overflow: hidden;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        .game-area {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #f0f8fb 0%, #e8f4f8 50%, #fdf2f8 100%);
+            animation: bgFloat 20s infinite ease-in-out;
+        }
+
+        @keyframes bgFloat {
+            0%, 100% { background-position: 0 0; }
+            50% { background-position: 0 5px; }
+        }
+
+        /* 玩家角色优化 */
+        .player {
+            position: absolute;
+            bottom: 8vh;
+            left: 10vw;
+            width: 6vw; 
+            height: 6vw;
+            min-width: 40px;
+            min-height: 40px;
+            max-width: 60px;
+            max-height: 60px;
+            z-index: 10;
+            transition: 
+                bottom 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                transform 0.2s ease-in-out;
+        }
+		
+		/* 玩家皮肤颜色样式 */
+		.player.skin-pink .player-inner {
+		    background: #ff8fab;
+		}
+		
+		.player.skin-blue .player-inner {
+		    background: #4fc3f7;
+		}
+		
+		.player.skin-yellow .player-inner {
+		    background: #ffee58;
+		}
+		
+		.player.skin-purple .player-inner {
+		    background: #ba68c8;
+		}
+		
+		.player.skin-green .player-inner {
+		    background: #81c784;
+		}
+
+        .player-inner {
+            width: 100%;
+            height: 100%;
+            background: #ff8fab;
+            border-radius: 50% 50% 20% 20%;
+            position: relative;
+            box-shadow: inset -3px -3px 0 rgba(0,0,0,0.08);
+            animation: bounceIdle 2s infinite ease-in-out, breath 3s infinite ease-in-out;
+        }
+
+        @keyframes breath {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+
+        .player.jumping {
+            filter: drop-shadow(0 3px 4px rgba(255, 143, 171, 0.3));
+        }
+
+        .player.jumping .player-inner {
+            animation: none;
+            transform: scale(0.95, 1.05) rotate(3deg);
+            border-radius: 45% 55% 25% 15%;
+        }
+
+        .player.peaking .player-inner {
+            transform: scale(1.05, 0.95) rotate(-2deg);
+            border-radius: 50% 50% 15% 25%;
+        }
+
+        .player.falling .player-inner {
+            transform: scale(1, 1) rotate(1deg);
+        }
+
+        .player-inner::before, .player-inner::after {
+            content: '';
+            position: absolute;
+            top: 20%;
+            width: 15%;
+            height: 15%;
+            background: #333;
+            border-radius: 50%;
+            transition: all 0.1s ease;
+        }
+
+        .player-inner::before { left: 20%; }
+        .player-inner::after { right: 20%; }
+
+        .player.jumping .player-inner::before,
+        .player.jumping .player-inner::after {
+            top: 22%;
+            width: 15%;
+            height: 3%;
+            border-radius: 3px;
+            background: #555;
+        }
+
+        .player.peaking .player-inner::before,
+        .player.peaking .player-inner::after {
+            width: 18%;
+            height: 18%;
+            top: 18%;
+        }
+
+        .player-mouth {
+            position: absolute;
+            bottom: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 25%;
+            height: 12%;
+            border-radius: 0 0 50% 50%;
+            background: #333;
+            overflow: hidden;
+            transition: all 0.15s ease;
+        }
+
+        .player.jumping .player-mouth {
+            width: 30%;
+            height: 15%;
+            border-radius: 50%;
+            background: #ff6b6b;
+        }
+
+        .player.peaking .player-mouth {
+            width: 20%;
+            height: 18%;
+            border-radius: 50%;
+        }
+
+        /* 跳跃特效 */
+        .player.jumping::after {
+            content: '✨';
+            position: absolute;
+            bottom: -20%;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: sparkle 0.3s ease-out forwards;
+            font-size: 60%;
+            z-index: 5;
+        }
+
+        .player.jumping::before {
+            content: '⭐';
+            position: absolute;
+            bottom: -10%;
+            left: calc(20% + var(--star-offset, 0px));
+            transform: translateX(-50%);
+            animation: sparkle 0.4s ease-out forwards 0.1s;
+            font-size: 40%;
+            z-index: 5;
+        }
+
+        @keyframes sparkle {
+            0% { opacity: 1; transform: translateX(-50%) scale(1); }
+            50% { opacity: 0.8; transform: translateX(-50%) scale(1.2); }
+            100% { opacity: 0; transform: translateX(-50%) scale(0.5) translateY(-10px); }
+        }
+
+        /* 多种障碍物样式 */
+        .obstacle {
+            position: absolute;
+            bottom: 8vh;
+            width: 5vw;
+            height: 5vw;
+            min-width: 35px;
+            min-height: 35px;
+            max-width: 50px;
+            max-height: 50px;
+            border-radius: 20px 20px 15px 15px;
+            transition: left 0.1s linear;
+            box-shadow: inset -3px -3px 0 rgba(0,0,0,0.08);
+            animation: obstaclePulse 2s infinite ease-in-out;
+            z-index: 5;
+        }
+
+        /* 基础障碍物 */
+        .obstacle.basic {
+            background: linear-gradient(135deg, #b794f4 0%, #9f7aea 100%);
+        }
+
+        .obstacle.basic::before {
+            content: '';
+            position: absolute;
+            top: 20%;
+            left: 20%;
+            width: 15%;
+            height: 15%;
+            background: rgba(255,255,255,0.8);
+            border-radius: 50%;
+        }
+
+        /* 浮动障碍物 */
+        .obstacle.floating {
+            background: linear-gradient(135deg, #42a5f5 0%, #2196f3 100%);
+            animation: obstaclePulse 2s infinite ease-in-out, floatUpDown 3s infinite ease-in-out;
+        }
+
+        .obstacle.floating::before {
+            content: '🌊';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5vw;
+        }
+
+        @keyframes floatUpDown {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-15px) scale(1.05); }
+        }
+
+        /* 大型障碍物 */
+        .obstacle.large {
+            width: 6vw;
+            height: 8vw;
+            min-width: 40px;
+            min-height: 60px;
+            max-width: 60px;
+            max-height: 80px;
+            background: linear-gradient(135deg, #ef5350 0%, #e53935 100%);
+            border-radius: 25px 25px 15px 15px;
+        }
+
+        .obstacle.large::before {
+            content: '🪨';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2vw;
+        }
+
+        /* 快速障碍物 */
+        .obstacle.fast {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+            width: 4vw;
+            height: 4vw;
+            min-width: 30px;
+            min-height: 30px;
+            max-width: 45px;
+            max-height: 45px;
+            animation: obstaclePulse 1s infinite ease-in-out, fastGlow 1.5s infinite ease-in-out;
+        }
+
+        .obstacle.fast::before {
+            content: '⚡';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.2vw;
+        }
+
+        @keyframes fastGlow {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 152, 0, 0.5), inset -3px -3px 0 rgba(0,0,0,0.08); }
+            50% { box-shadow: 0 0 15px rgba(255, 152, 0, 0.8), inset -3px -3px 0 rgba(0,0,0,0.08); }
+        }
+
+        /* 易碎障碍物 */
+        .obstacle.breakable {
+            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+            opacity: 0.9;
+        }
+
+        .obstacle.breakable::before {
+            content: '🍃';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5vw;
+        }
+
+        /* 旋转障碍物 */
+        .obstacle.rotating {
+            background: linear-gradient(135deg, #26a69a 0%, #00897b 100%);
+            animation: obstacleRotate 3s infinite linear, obstaclePulse 2s infinite ease-in-out;
+        }
+
+        .obstacle.rotating::before {
+            content: '🔄';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5vw;
+        }
+
+        @keyframes obstacleRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 障碍物通用动画 */
+        @keyframes obstaclePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* 易碎障碍物破碎动画 */
+        @keyframes breakEffect {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2) rotate(10deg); opacity: 0.5; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        .obstacle.breaking {
+            animation: breakEffect 0.3s forwards;
+        }
+
+        /* 地面优化 */
+        .ground {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 8vh;
+            background: linear-gradient(180deg, #c8e6c9 0%, #b2dfdb 100%);
+            border-top: 2px solid #a5d6a7;
+        }
+
+        .ground::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 15%;
+            background: repeating-linear-gradient(
+                90deg,
+                #81c784,
+                #81c784 2vw,
+                #a5d6a7 2vw,
+                #a5d6a7 4vw
+            );
+            opacity: 0.6;
+            animation: groundScroll 10s linear infinite;
+        }
+
+        @keyframes groundScroll {
+            0% { background-position: 0 0; }
+            100% { background-position: -40vw 0; }
+        }
+
+        /* 分数优化 */
+        .score {
+            position: absolute;
+            top: 3vh;
+            left: 4vw;
+            color: #7b1fa2;
+            font-size: 5vw;
+            font-weight: bold;
+            text-shadow: 1px 1px 0 rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.85);
+            padding: 1vw 2.5vw;
+            border-radius: 50px;
+            border: 2px solid #e1bee7;
+            min-font-size: 24px;
+            max-font-size: 40px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: transform 0.1s ease;
+        }
+
+        .score.updating {
+            transform: scale(1.1);
+        }
+
+        /* 分数爆炸特效 */
+        .score-pop {
+            position: absolute;
+            color: #7b1fa2;
+            font-size: 2vw;
+            font-weight: bold;
+            pointer-events: none;
+            animation: scorePop 1s forwards;
+            z-index: 15;
+        }
+
+        @keyframes scorePop {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-30px); opacity: 0; }
+        }
+
+        /* 道具系统 - 增强视觉效果 */
+        .power-up {
+            position: absolute;
+            bottom: 10vh;
+            width: 4vw;
+            height: 4vw;
+            min-width: 30px;
+            min-height: 30px;
+            max-width: 45px;
+            max-height: 45px;
+            border-radius: 50%;
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            font-size: 2vw;
+            animation: float 2s infinite ease-in-out, powerUpGlow 1.5s infinite ease-in-out;
+            z-index: 8;
+            box-shadow: 0 0 20px rgba(255, 235, 59, 0.7);
         }
-        
-        .toolbar-btn {
-            padding: 8px 15px;
-            border: 1px solid #dee2e6;
-            background: white;
-            border-radius: 6px;
+
+        /* 道具发光特效 */
+        @keyframes powerUpGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(255, 235, 59, 0.5); }
+            50% { box-shadow: 0 0 25px rgba(255, 235, 59, 0.9); }
+        }
+
+        .speed-boost {
+            background: linear-gradient(135deg, #ffeb3b, #ffc107);
+        }
+
+        .shield {
+            background: linear-gradient(135deg, #4fc3f7, #29b6f6);
+        }
+
+        .double-score {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+        }
+
+        /* 新增道具：时间减速 */
+        .slow-motion {
+            background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+        }
+
+        @keyframes float {
+            0%,100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        /* 护盾效果 */
+        .player-shield {
+            position: absolute;
+            width: 120%;
+            height: 120%;
+            border: 2px solid #4fc3f7;
+            border-radius: 50%;
+            left: -10%;
+            top: -10%;
+            box-shadow: 0 0 15px #4fc3f7;
+            animation: shieldPulse 1s infinite ease-in-out;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        @keyframes shieldPulse {
+            0%,100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+
+        /* 游戏结束界面优化 */
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #7b1fa2;
+            text-align: center;
+            display: none;
+            background: rgba(255,255,255,0.98);
+            padding: 2vw 4vw;
+            border-radius: 25px;
+            border: 2px solid #e1bee7;
+            box-shadow: 0 5px 15px rgba(174, 129, 255, 0.2);
+            width: 50%;
+            max-width: 320px;
+            min-width: 200px;
+            animation: gameOverPopup 0.3s ease-out forwards;
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.8);
+        }
+
+        @keyframes gameOverPopup {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            70% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .game-over h1 {
+            font-size: 5vw;
+            margin-bottom: 1vw;
+            color: #ec407a;
+            text-shadow: 2px 2px 0 rgba(255,255,255,0.9);
+            min-font-size: 24px;
+            max-font-size: 36px;
+        }
+
+        .high-score {
+            font-size: 2.5vw;
+            color: #ff9800;
+            margin-bottom: 1.5vw;
+        }
+
+        .game-over p {
+            font-size: 3vw;
+            margin-bottom: 2vw;
+            min-font-size: 16px;
+            max-font-size: 24px;
+        }
+
+        /* 按钮优化 */
+        .restart-btn {
+            padding: 1.5vw 4vw;
+            background: linear-gradient(to right, #f48fb1, #ff80ab);
+            color: white;
+            border: none;
+            border-radius: 40px;
+            font-size: 2.5vw;
             cursor: pointer;
             transition: all 0.2s;
+            box-shadow: 0 3px 0 #d81b60;
+            text-shadow: 1px 1px 0 rgba(0,0,0,0.1);
+            min-font-size: 16px;
+            max-font-size: 22px;
+            min-width: 100px;
+            width: 80%;
+            position: relative;
+            overflow: hidden;
         }
-        
-        .toolbar-btn:hover {
-            background: #f8f9fa;
-            border-color: #adb5bd;
+
+        .restart-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent);
+            transform: rotate(45deg);
+            animation: btnShine 3s infinite linear;
         }
-        
-        .title-input {
-            width: 100%;
-            padding: 15px;
-            font-size: 24px;
-            font-weight: bold;
-            border: none;
-            border-bottom: 2px solid #eee;
-            margin-bottom: 20px;
-            outline: none;
+
+        @keyframes btnShine {
+            0% { transform: rotate(45deg) translateX(-100%); }
+            100% { transform: rotate(45deg) translateX(100%); }
         }
-        
-        .content-editor {
-            width: 100%;
-            min-height: 400px;
-            padding: 20px;
-            font-size: 16px;
-            line-height: 1.6;
-            border: 1px solid #dee2e6;
-            border-radius: 10px;
-            resize: vertical;
-            font-family: inherit;
+
+        .restart-btn:hover {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #d81b60, 0 0 15px rgba(255, 128, 171, 0.5);
+            background: linear-gradient(to right, #ff80ab, #f48fb1);
         }
-        
-        .mood-selector {
-            margin-top: 20px;
+
+        /* 音效按钮优化 */
+        .sound-toggle {
+            position: absolute;
+            top: 3vh;
+            right: 4vw;
+            width: 7vw;
+            height: 7vw;
+            background: linear-gradient(to right, #b794f4, #9f7aea);
+            border-radius: 50%;
             display: flex;
-            gap: 10px;
+            justify-content: center;
             align-items: center;
+            cursor: pointer;
+            color: white;
+            font-size: 3.5vw;
+            box-shadow: 0 3px 0 rgba(0,0,0,0.08);
+            border: 2px solid white;
+            min-width: 40px;
+            min-height: 40px;
+            max-width: 55px;
+            max-height: 55px;
+            animation: soundPulse 4s infinite ease-in-out;
         }
-        
-        .mood-btn {
-            padding: 8px 15px;
-            border: 1px solid #dee2e6;
+
+        @keyframes soundPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* 提示文字优化 */
+        .instructions {
+            position: absolute;
+            bottom: 3vh;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #6a1b9a;
+            font-size: 2.5vw;
+            text-align: center;
+            background: rgba(255,255,255,0.9);
+            padding: 1vw 3vw;
+            border-radius: 50px;
+            border: 2px solid #e1bee7;
+            min-font-size: 14px;
+            max-font-size: 18px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            animation: instructionFade 10s infinite ease-in-out;
+        }
+
+        @keyframes instructionFade {
+            0%, 80%, 100% { opacity: 1; }
+            90% { opacity: 0.3; }
+        }
+
+        /* 背景装饰优化 */
+        .background-decoration {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .cloud {
+            position: absolute;
+            width: 12vw;
+            height: 6vw;
             background: white;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.2s;
+            border-radius: 50px;
+            opacity: calc(0.7 + var(--cloud-opacity, 0));
+            animation: floatCloud 35s infinite linear;
+            min-width: 80px;
+            min-height: 40px;
+            max-width: 120px;
+            max-height: 60px;
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.05));
         }
-        
-        .mood-btn:hover {
-            transform: scale(1.05);
+
+        .cloud::before {
+            content: '';
+            position: absolute;
+            width: 6vw;
+            height: 6vw;
+            background: white;
+            border-radius: 50%;
+            top: -3vw;
+            left: 3vw;
         }
-        
-        .mood-btn.selected {
-            background: #3498db;
-            color: white;
-            border-color: #3498db;
+
+        .cloud::after {
+            content: '';
+            position: absolute;
+            width: 8vw;
+            height: 8vw;
+            background: white;
+            border-radius: 50%;
+            top: -4vw;
+            right: 2vw;
         }
-        
-        .status-bar {
-            background: #f8f9fa;
-            padding: 15px 30px;
-            border-top: 1px solid #dee2e6;
+
+        .cloud-1 {
+            top: 15vh;
+            left: -15vw;
+            animation-delay: 0s;
+            --cloud-opacity: 0.2;
+        }
+
+        .cloud-2 {
+            top: 35vh;
+            left: -15vw;
+            animation-delay: 10s;
+            animation-duration: 40s;
+            transform: scale(0.85);
+            --cloud-opacity: 0.1;
+        }
+
+        .cloud-3 {
+            top: 55vh;
+            left: -15vw;
+            animation-delay: 20s;
+            animation-duration: 45s;
+            transform: scale(0.7);
+            --cloud-opacity: 0.15;
+        }
+
+        @keyframes floatCloud {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(110vw); }
+        }
+
+        /* 背景粒子 */
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            border-radius: 50%;
+            background: white;
+            opacity: 0.8;
+            pointer-events: none;
+            animation: particleFloat 20s infinite linear;
+        }
+
+        @keyframes particleFloat {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100vw); }
+        }
+
+        /* 震动效果 */
+        @keyframes vibrate {
+            0%,100% { transform: translateX(0); }
+            20% { transform: translateX(-5px); }
+            40% { transform: translateX(5px); }
+            60% { transform: translateX(-3px); }
+            80% { transform: translateX(3px); }
+        }
+
+        /* 加载界面 */
+        .loading-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #fce4ec, #e1f5fe);
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            justify-content: center;
             align-items: center;
+            z-index: 100;
+            transition: opacity 0.5s ease-out;
         }
-        
-        .word-count {
-            color: #7f8c8d;
-            font-size: 14px;
+
+        .loading-icon {
+            font-size: 8vw;
+            animation: loadingSpin 2s infinite ease-in-out;
+            margin-bottom: 2vw;
         }
-        
-        .save-btn {
-            padding: 10px 25px;
-            background: #2ecc71;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s;
+
+        @keyframes loadingSpin {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.2); }
+            100% { transform: rotate(360deg) scale(1); }
         }
-        
-        .save-btn:hover {
-            background: #27ae60;
+
+        .loading-text {
+            font-size: 3vw;
+            color: #7b1fa2;
+            animation: loadingPulse 1.5s infinite ease-in-out;
         }
-        
-        @media (max-width: 768px) {
-            .main-content {
-                flex-direction: column;
-            }
-            
-            .sidebar {
-                width: 100%;
-                border-right: none;
-                border-bottom: 1px solid #dee2e6;
-            }
+
+        @keyframes loadingPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* 基础动画 */
+        @keyframes bounceIdle {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-3px) rotate(0.5deg); }
+        }
+
+        @keyframes landShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-1px); }
+            75% { transform: translateX(1px); }
+        }
+
+        .player.landing {
+            animation: landShake 0.2s ease-in-out;
+        }
+
+        /* 响应式适配 */
+        @media (orientation: landscape) {
+            .player { width: 5vw; height: 5vw; }
+            .obstacle { width: 4.5vw; height: 4.5vw; }
+            .obstacle.large { width: 5.5vw; height: 7vw; }
+            .obstacle.fast { width: 3.5vw; height: 3.5vw; }
+            .ground { height: 10vh; }
+            .player, .obstacle { bottom: 10vh; }
+            .score { font-size: 4vw; }
+            .sound-toggle { width: 6vw; height: 6vw; font-size: 3vw; }
+            .game-over { width: 40%; padding: 1.5vw 3vw; }
+            .game-over h1 { font-size: 4vw; }
+            .game-over p { font-size: 2.5vw; }
+            .restart-btn { font-size: 2vw; padding: 1vw 3vw; }
+            .user-info { right: 10vw; }
+            .user-avatar { width: 4vw; height: 4vw; font-size: 1.8vw; }
+            .user-name { font-size: 1.8vw; }
+            .center-btn { font-size: 1.8vw; }
+        }
+
+        @media (max-width: 480px) {
+            .score { font-size: 6vw; padding: 1.5vw 3vw; }
+            .sound-toggle { width: 9vw; height: 9vw; font-size: 4.5vw; }
+            .instructions { font-size: 3vw; padding: 1.5vw 4vw; }
+            .game-over { width: 70%; padding: 3vw 5vw; max-width: 280px; }
+            .game-over h1 { font-size: 6vw; }
+            .game-over p { font-size: 4vw; margin-bottom: 3vw; }
+            .restart-btn { padding: 2.5vw 6vw; font-size: 3.5vw; }
+            .loading-icon { font-size: 12vw; }
+            .loading-text { font-size: 4vw; }
+            .obstacle::before { font-size: 3vw !important; }
+            .power-up { font-size: 3vw !important; }
+            .auth-box { padding: 20px; }
+            .auth-title { font-size: 24px; }
+            .user-info { right: 15vw; padding: 1vw 2vw; }
+            .user-avatar { width: 8vw; height: 8vw; font-size: 3vw; }
+            .user-name { font-size: 2.5vw; }
+            .logout-btn { font-size: 2.5vw; }
+            .center-btn { font-size: 2.5vw; }
+            .skin-grid { grid-template-columns: repeat(2, 1fr); }
+            .skin-preview { width: 50px; height: 50px; font-size: 24px; }
+        }
+
+        @media (min-width: 1024px) {
+            .player { width: 50px; height: 50px; }
+            .obstacle { width: 45px; height: 45px; }
+            .obstacle.large { width: 55px; height: 75px; }
+            .obstacle.fast { width: 35px; height: 35px; }
+            .score { font-size: 36px; padding: 8px 20px; }
+            .sound-toggle { width: 50px; height: 50px; font-size: 24px; }
+            .instructions { font-size: 16px; padding: 8px 20px; }
+            .game-over { width: 300px; padding: 15px 30px; }
+            .game-over h1 { font-size: 28px; }
+            .game-over p { font-size: 20px; margin-bottom: 15px; }
+            .restart-btn { font-size: 18px; padding: 10px 30px; }
+            .loading-icon { font-size: 60px; }
+            .loading-text { font-size: 24px; }
+            .obstacle::before { font-size: 18px !important; }
+            .power-up { font-size: 18px !important; width: 40px; height: 40px; }
+            .user-info { right: 8vw; }
+            .user-avatar { width: 40px; height: 40px; font-size: 18px; }
+            .user-name { font-size: 16px; }
+            .logout-btn { font-size: 16px; }
+            .center-btn { font-size: 16px; }
         }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <header class="app-header">
-            <div class="header-title">
-                <i class="fas fa-book fa-2x"></i>
-                <div>
-                    <h1>我的个人日记本</h1>
-                    <div class="date-display" id="currentDate"></div>
-                </div>
-            </div>
-            <div class="header-actions">
-                <button class="save-btn" onclick="saveDiary()">
-                    <i class="fas fa-save"></i> 保存日记
-                </button>
-            </div>
-        </header>
-        
-        <div class="main-content">
-            <aside class="sidebar">
-                <div class="search-box">
-                    <input type="text" id="searchInput" placeholder="搜索日记..." 
-                           onkeyup="searchDiaries()">
-                    <button class="search-btn">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </div>
-                
-                <button class="new-diary-btn" onclick="newDiary()">
-                    <i class="fas fa-plus"></i> 写新日记
-                </button>
-                
-                <div class="diary-list" id="diaryList">
-                    <!-- 日记列表将通过JavaScript动态生成 -->
-                </div>
-            </aside>
+    <!-- 登录注册界面 -->
+    <div class="auth-container" id="auth-container">
+        <div class="auth-box">
+            <h2 class="auth-title">🐰 萌萌跳跃 - 登录</h2>
             
-            <main class="editor-area">
-                <input type="text" class="title-input" id="diaryTitle" 
-                       placeholder="日记标题...">
-                
-                <div class="editor-toolbar">
-                    <button class="toolbar-btn" onclick="formatText('bold')">
-                        <i class="fas fa-bold"></i>
-                    </button>
-                    <button class="toolbar-btn" onclick="formatText('italic')">
-                        <i class="fas fa-italic"></i>
-                    </button>
-                    <button class="toolbar-btn" onclick="formatText('underline')">
-                        <i class="fas fa-underline"></i>
-                    </button>
-                    <select class="toolbar-btn" onchange="changeFontSize(this.value)">
-                        <option value="14">14px</option>
-                        <option value="16" selected>16px</option>
-                        <option value="18">18px</option>
-                        <option value="20">20px</option>
-                    </select>
+            <div class="auth-tabs">
+                <div class="auth-tab active" data-tab="login">登录</div>
+                <div class="auth-tab" data-tab="register">注册</div>
+            </div>
+            
+            <!-- 登录表单 -->
+            <div class="auth-form active" id="login-form">
+                <div class="form-group">
+                    <label class="form-label">用户名</label>
+                    <input type="text" class="form-input" id="login-username" placeholder="请输入用户名">
+                    <div class="form-error" id="login-username-error">用户名不能为空</div>
                 </div>
-                
-                <textarea class="content-editor" id="diaryContent" 
-                          placeholder="今天发生了什么？写下你的故事..."
-                          oninput="updateWordCount()"></textarea>
-                
-                <div class="mood-selector">
-                    <span>心情：</span>
-                    <button class="mood-btn" onclick="setMood('happy')">😊 开心</button>
-                    <button class="mood-btn" onclick="setMood('sad')">😢 伤心</button>
-                    <button class="mood-btn" onclick="setMood('excited')">😎 兴奋</button>
-                    <button class="mood-btn" onclick="setMood('thoughtful')">🤔 思考</button>
+                <div class="form-group">
+                    <label class="form-label">密码</label>
+                    <input type="password" class="form-input" id="login-password" placeholder="请输入密码">
+                    <div class="form-error" id="login-password-error">密码不能为空</div>
                 </div>
-            </main>
+                <div class="form-error" id="login-error" style="text-align: center; margin-bottom: 10px;">用户名或密码错误</div>
+                <button class="auth-btn" id="login-btn">登录</button>
+                <div class="auth-footer">
+                    还没有账号？点击注册
+                </div>
+            </div>
+            
+            <!-- 注册表单 -->
+            <div class="auth-form" id="register-form">
+                <div class="form-group">
+                    <label class="form-label">用户名</label>
+                    <input type="text" class="form-input" id="register-username" placeholder="请输入用户名（2-10个字符）">
+                    <div class="form-error" id="register-username-error">用户名格式不正确</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">密码</label>
+                    <input type="password" class="form-input" id="register-password" placeholder="请输入密码（至少6位）">
+                    <div class="form-error" id="register-password-error">密码长度不能少于6位</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">确认密码</label>
+                    <input type="password" class="form-input" id="register-confirm-password" placeholder="请再次输入密码">
+                    <div class="form-error" id="register-confirm-error">两次密码不一致</div>
+                </div>
+                <div class="form-error" id="register-error" style="text-align: center; margin-bottom: 10px;">用户名已存在</div>
+                <button class="auth-btn" id="register-btn">注册</button>
+                <div class="auth-footer">
+                    已有账号？点击登录
+                </div>
+            </div>
+        </div>
+    </div>
+	
+    <!-- 个人中心界面 -->
+    <div class="center-container" id="center-container">
+        <div class="center-box">
+            <div class="center-close" id="center-close">✕</div>
+            <h2 class="center-title">🎨 个人中心</h2>
+            
+            <!-- 皮肤选择区域 -->
+            <div class="skin-section">
+                <h3 class="skin-title">🧸 选择玩家皮肤</h3>
+                <div class="skin-grid" id="skin-grid">
+                    <!-- 皮肤项会通过JS动态生成 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <!-- 用户信息栏 -->
+        <div class="user-info" id="user-info" style="display: none;">
+            <div class="user-avatar" id="user-avatar">👤</div>
+            <div class="user-name" id="user-name">用户名</div>
+			<button class="center-btn" id="center-btn">🎨</button>
+            <button class="logout-btn" id="logout-btn">🚪</button>
         </div>
         
-        <footer class="status-bar">
-            <div class="word-count" id="wordCount">字数: 0</div>
-            <div>
-                <span id="saveStatus">未保存</span>
+        <!-- 加载界面 -->
+        <div class="loading-screen" id="loading-screen">
+            <div class="loading-icon">🐰</div>
+            <div class="loading-text">萌萌跳跃加载中...</div>
+        </div>
+        
+        <div class="game-area">
+            <!-- 背景装饰 -->
+            <div class="background-decoration" id="background-particles"></div>
+            <div class="background-decoration">
+                <div class="cloud cloud-1"></div>
+                <div class="cloud cloud-2"></div>
+                <div class="cloud cloud-3"></div>
             </div>
-        </footer>
+            
+            <!-- 玩家角色 -->
+            <div class="player skin-pink" id="player">
+                <div class="player-inner">
+                    <div class="player-mouth"></div>
+                </div>
+            </div>
+            
+            <!-- 游戏元素 -->
+            <div class="ground"></div>
+            <div class="score">0</div>
+            <div class="sound-toggle" id="sound-toggle">🔊</div>
+            
+            <!-- 游戏结束界面 -->
+            <div class="game-over">
+                <h1>💥 游戏结束 💥</h1>
+                <div class="high-score" id="high-score">最高分: 0 个</div>
+                <p>跳过障碍物: <span id="final-score">0</span> 个</p>
+                <button class="restart-btn">✨ 重新开始 ✨</button>
+            </div>
+            
+            <!-- 提示文字优化 -->
+            <div class="instructions">
+                点击/触摸屏幕或按空格键跳跃 🐰<br>
+                拾取道具获得强力效果！
+            </div>
+        </div>
     </div>
 
     <script>
-        // 初始化数据
-        let diaries = JSON.parse(localStorage.getItem('diaries')) || [];
-        let currentDiaryId = null;
-        let currentMood = '';
-        
-        // 初始化页面
-        function init() {
-            updateDate();
-            loadDiaryList();
+        // 等待DOM加载完成后执行所有代码
+        document.addEventListener('DOMContentLoaded', function() {
+            // ========== 新增：皮肤数据定义 ==========
+            const skinData = [
+                { id: 'pink', name: '粉色方块', color: '#ff8fab', icon: '🐰' },
+                { id: 'blue', name: '蓝色方块', color: '#4fc3f7', icon: '🐳' },
+                { id: 'yellow', name: '黄色方块', color: '#ffee58', icon: '🐤' },
+                { id: 'purple', name: '紫色方块', color: '#ba68c8', icon: '🦄' },
+                { id: 'green', name: '绿色方块', color: '#81c784', icon: '🐸' }
+            ];
+			
+            // 登录注册相关元素
+            const authContainer = document.getElementById('auth-container');
+            const authTabs = document.querySelectorAll('.auth-tab');
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const loginBtn = document.getElementById('login-btn');
+            const registerBtn = document.getElementById('register-btn');
+            const userInfo = document.getElementById('user-info');
+            const userAvatar = document.getElementById('user-avatar');
+            const userName = document.getElementById('user-name');
+            const logoutBtn = document.getElementById('logout-btn');
             
-            // 自动保存
-            setInterval(autoSave, 30000);
+            // ========== 新增：个人中心相关元素 ==========
+            const centerContainer = document.getElementById('center-container');
+            const centerBtn = document.getElementById('center-btn');
+            const centerClose = document.getElementById('center-close');
+            const skinGrid = document.getElementById('skin-grid');
+            const player = document.getElementById('player');
+			
+            // 表单错误提示元素
+            const loginUsernameError = document.getElementById('login-username-error');
+            const loginPasswordError = document.getElementById('login-password-error');
+            const loginError = document.getElementById('login-error');
+            const registerUsernameError = document.getElementById('register-username-error');
+            const registerPasswordError = document.getElementById('register-password-error');
+            const registerConfirmError = document.getElementById('register-confirm-error');
+            const registerError = document.getElementById('register-error');
             
-            // 监听输入变化
-            document.getElementById('diaryTitle').addEventListener('input', markUnsaved);
-            document.getElementById('diaryContent').addEventListener('input', markUnsaved);
-        }
-        
-        // 更新日期显示
-        function updateDate() {
-            const now = new Date();
-            const options = { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            };
-            document.getElementById('currentDate').textContent = 
-                now.toLocaleDateString('zh-CN', options);
-        }
-        
-        // 加载日记列表
-        function loadDiaryList() {
-            const listElement = document.getElementById('diaryList');
-            listElement.innerHTML = '';
+            // 核心游戏元素
+            const gameArea = document.querySelector('.game-area');
+            const scoreElement = document.querySelector('.score');
+            const gameOverScreen = document.querySelector('.game-over');
+            const finalScoreElement = document.getElementById('final-score');
+            const highScoreElement = document.getElementById('high-score');
+            const restartBtn = document.querySelector('.restart-btn');
+            const soundToggle = document.getElementById('sound-toggle');
+            const gameContainer = document.querySelector('.game-container');
+            const loadingScreen = document.getElementById('loading-screen');
+            const backgroundParticles = document.getElementById('background-particles');
             
-            // 按日期倒序排序
-            diaries.sort((a, b) => new Date(b.date) - new Date(a.date));
+            // 游戏核心参数
+            let isJumping = false;
+            let score = 0; // 跳过的障碍物数量
+            let gameSpeed = 5;
+            let obstacleInterval = 1800;
+            let gameRunning = true;
+            let obstacleTimer;
+            let powerUpTimer;
+            let soundEnabled = true;
+            let currentUser = null; // 当前登录用户
+            let userHighScores = {}; // 所有用户的最高分
+            let userSkins = {}; // 存储用户的皮肤选择
             
-            diaries.forEach(diary => {
-                const item = document.createElement('div');
-                item.className = 'diary-item';
-                item.id = `diary-${diary.id}`;
-                item.onclick = () => openDiary(diary.id);
-                
-                const date = new Date(diary.date).toLocaleDateString('zh-CN');
-                const preview = diary.content.substring(0, 50) + 
-                    (diary.content.length > 50 ? '...' : '');
-                
-                item.innerHTML = `
-                    <div class="diary-date">${date}</div>
-                    <div class="diary-title">${diary.title || '无标题'}</div>
-                    <div style="font-size: 12px; color: #666; margin-top: 5px;">
-                        ${preview}
-                    </div>
-                `;
-                
-                listElement.appendChild(item);
-            });
+            // 道具相关
+            let isInvincible = false;
+            let isDoubleScore = false;
+            let isSpeedBoost = false;
+            let isSlowMotion = false; // 新增：时间减速
+            let shieldElement = null;
+            let originalGameSpeed = 5; // 记录原始速度
             
-            updateWordCount();
-        }
-        
-        // 创建新日记
-        function newDiary() {
-            currentDiaryId = null;
-            document.getElementById('diaryTitle').value = '';
-            document.getElementById('diaryContent').value = '';
-            currentMood = '';
+            // 尺寸参数
+            let groundHeight = 8;
+            let playerStartPos = groundHeight;
+            let jumpHeight = 0;
             
-            // 移除选中状态
-            document.querySelectorAll('.diary-item').forEach(item => {
-                item.classList.remove('selected');
-            });
+            // 记录已跳过的障碍物ID
+            let skippedObstacleIds = new Set();
+            let obstacleIdCounter = 0;
             
-            // 清空心情选择
-            document.querySelectorAll('.mood-btn').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-            
-            document.getElementById('saveStatus').textContent = '新建日记';
-        }
-        
-        // 打开日记
-        function openDiary(id) {
-            const diary = diaries.find(d => d.id === id);
-            if (!diary) return;
-            
-            currentDiaryId = id;
-            document.getElementById('diaryTitle').value = diary.title || '';
-            document.getElementById('diaryContent').value = diary.content || '';
-            currentMood = diary.mood || '';
-            
-            // 更新选中状态
-            document.querySelectorAll('.diary-item').forEach(item => {
-                item.classList.remove('selected');
-            });
-            document.getElementById(`diary-${id}`).classList.add('selected');
-            
-            // 更新心情选择
-            document.querySelectorAll('.mood-btn').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-            if (currentMood) {
-                const moodBtn = document.querySelector(`[onclick="setMood('${currentMood}')"]`);
-                if (moodBtn) moodBtn.classList.add('selected');
-            }
-            
-            document.getElementById('saveStatus').textContent = '已加载';
-            updateWordCount();
-        }
-        
-        // 保存日记
-        function saveDiary() {
-            const title = document.getElementById('diaryTitle').value.trim();
-            const content = document.getElementById('diaryContent').value.trim();
-            
-            if (!title && !content) {
-                alert('请填写日记内容！');
-                return;
-            }
-            
-            const now = new Date();
-            const diary = {
-                id: currentDiaryId || Date.now(),
-                title: title || '无标题',
-                content: content,
-                mood: currentMood,
-                date: now.toISOString(),
-                lastModified: now.toISOString()
-            };
-            
-            if (currentDiaryId) {
-                // 更新现有日记
-                const index = diaries.findIndex(d => d.id === currentDiaryId);
-                if (index !== -1) {
-                    diaries[index] = diary;
+            // 障碍物类型配置
+            const obstacleTypes = [
+                { 
+                    type: 'basic', 
+                    name: '基础障碍物', 
+                    speedMultiplier: 1, 
+                    sizeMultiplier: 1,
+                    spawnChance: 0.4, // 40%概率
+                    special: null
+                },
+                { 
+                    type: 'floating', 
+                    name: '浮动障碍物', 
+                    speedMultiplier: 1, 
+                    sizeMultiplier: 1,
+                    spawnChance: 0.25, // 25%概率
+                    special: 'float'
+                },
+                { 
+                    type: 'large', 
+                    name: '大型障碍物', 
+                    speedMultiplier: 0.9, 
+                    sizeMultiplier: 1.4,
+                    spawnChance: 0.15, // 15%概率
+                    special: 'large'
+                },
+                { 
+                    type: 'fast', 
+                    name: '快速障碍物', 
+                    speedMultiplier: 1.4, 
+                    sizeMultiplier: 0.8,
+                    spawnChance: 0.15, // 15%概率
+                    special: 'fast'
+                },
+                { 
+                    type: 'rotating', 
+                    name: '旋转障碍物', 
+                    speedMultiplier: 1, 
+                    sizeMultiplier: 1,
+                    spawnChance: 0.05, // 5%概率
+                    special: 'rotate'
+                },
+                { 
+                    type: 'breakable', 
+                    name: '易碎障碍物', 
+                    speedMultiplier: 1, 
+                    sizeMultiplier: 1,
+                    spawnChance: 0.0, // 初始禁用，分数达到20后启用
+                    special: 'breakable'
                 }
-            } else {
-                // 添加新日记
-                diaries.push(diary);
-                currentDiaryId = diary.id;
+            ];
+            
+            // 道具配置（提升概率）
+            const powerUpConfig = {
+                spawnChance: 0.15, // 从3%提升到15%的基础生成概率
+                spawnInterval: 4000, // 从8秒缩短到4秒生成一次
+                types: [
+                    { type: 'speed-boost', icon: '⚡', chance: 0.3, duration: 6000 },
+                    { type: 'shield', icon: '🛡️', chance: 0.35, duration: 5000 }, // 提高护盾概率
+                    { type: 'double-score', icon: '✖2', chance: 0.25, duration: 8000 },
+                    { type: 'slow-motion', icon: '⏱️', chance: 0.1, duration: 7000 } // 新增：时间减速
+                ]
+            };
+			
+            // ====================== 新增：皮肤相关功能 ======================
+            
+            // 初始化皮肤选择界面
+            function initSkinSelection() {
+                // 清空皮肤网格
+                skinGrid.innerHTML = '';
+                
+                // 获取当前用户的皮肤设置
+                const currentSkin = getUserSkin(currentUser);
+                
+                // 生成皮肤项
+                skinData.forEach(skin => {
+                    const skinItem = document.createElement('div');
+                    skinItem.className = `skin-item ${skin.id === currentSkin ? 'active' : ''}`;
+                    skinItem.dataset.skinId = skin.id;
+                    
+                    skinItem.innerHTML = `
+                        <div class="skin-preview" style="background: linear-gradient(135deg, ${skin.color}, ${lightenColor(skin.color, 20)});">
+                            ${skin.icon}
+                        </div>
+                        <div class="skin-name">${skin.name}</div>
+                    `;
+					
+                    // 绑定皮肤选择事件
+                    skinItem.addEventListener('click', () => {
+                        selectSkin(skin.id);
+                    });
+                    
+                    skinGrid.appendChild(skinItem);
+                });
             }
             
-            // 保存到本地存储
-            localStorage.setItem('diaries', JSON.stringify(diaries));
-            
-            // 更新UI
-            loadDiaryList();
-            document.getElementById('saveStatus').textContent = 
-                `已保存 ${now.toLocaleTimeString('zh-CN', {hour: '2-digit', minute:'2-digit'})}`;
-            
-            // 确保新添加的日记被选中
-            openDiary(currentDiaryId);
-        }
-        
-        // 自动保存
-        function autoSave() {
-            const title = document.getElementById('diaryTitle').value.trim();
-            const content = document.getElementById('diaryContent').value.trim();
-            
-            if (title || content) {
-                saveDiary();
+            // 选择皮肤
+            function selectSkin(skinId) {
+                if (!currentUser) return;
+                
+                // 更新玩家皮肤样式
+                player.className = `player skin-${skinId}`;
+                
+                // 保存到本地存储
+                userSkins[currentUser] = skinId;
+                localStorage.setItem('userSkins', JSON.stringify(userSkins));
+                
+                // 更新皮肤选择界面的激活状态
+                document.querySelectorAll('.skin-item').forEach(item => {
+                    item.classList.toggle('active', item.dataset.skinId === skinId);
+                });
+				
+                // 提示
+                alert(`已切换为${skinData.find(s => s.id === skinId).name}！`);
             }
-        }
-        
-        // 标记为未保存
-        function markUnsaved() {
-            if (document.getElementById('saveStatus').textContent !== '未保存') {
-                document.getElementById('saveStatus').textContent = '未保存';
-            }
-        }
-        
-        // 设置心情
-        function setMood(mood) {
-            currentMood = mood;
             
-            // 更新按钮状态
-            document.querySelectorAll('.mood-btn').forEach(btn => {
-                btn.classList.remove('selected');
+            // 获取用户的皮肤设置
+            function getUserSkin(username) {
+                if (!username) return 'pink';
+                
+                // 从本地存储加载皮肤数据
+                const savedSkins = localStorage.getItem('userSkins');
+                userSkins = savedSkins ? JSON.parse(savedSkins) : {};
+                
+                return userSkins[username] || 'pink';
+            }
+            
+            // 应用用户的皮肤设置
+            function applyUserSkin(username) {
+                const skinId = getUserSkin(username);
+                player.className = `player skin-${skinId}`;
+            }
+			
+            // 辅助函数：调整颜色亮度
+            function lightenColor(color, percent) {
+                // 移除#号
+                color = color.replace(/^#/, '');
+                
+                // 解析RGB
+                let r = parseInt(color.substr(0, 2), 16);
+                let g = parseInt(color.substr(2, 2), 16);
+                let b = parseInt(color.substr(4, 2), 16);
+                
+                // 提高亮度
+                r = Math.min(255, Math.round(r * (100 + percent) / 100));
+                g = Math.min(255, Math.round(g * (100 + percent) / 100));
+                b = Math.min(255, Math.round(b * (100 + percent) / 100));
+                
+                // 转换回十六进制
+                const rr = r.toString(16).padStart(2, '0');
+                const gg = g.toString(16).padStart(2, '0');
+                const bb = b.toString(16).padStart(2, '0');
+                
+                return `#${rr}${gg}${bb}`;
+            }
+            
+            // ====================== 登录注册系统 ======================
+            
+            // 初始化用户数据
+            function initUserData() {
+                // 从本地存储加载用户数据
+                const savedUsers = localStorage.getItem('jumpGameUsers');
+                const savedUserHighScores = localStorage.getItem('jumpGameHighScores');
+                const savedUserSkins = localStorage.getItem('userSkins');
+                const savedCurrentUser = localStorage.getItem('jumpGameCurrentUser');
+                
+                // 初始化用户列表
+                window.jumpGameUsers = savedUsers ? JSON.parse(savedUsers) : {};
+                
+                // 初始化用户最高分
+                userHighScores = savedUserHighScores ? JSON.parse(savedUserHighScores) : {};
+                
+                // 初始化用户皮肤数据
+                userSkins = savedUserSkins ? JSON.parse(savedUserSkins) : {};
+                
+                // 检查是否有记住的登录用户
+                if (savedCurrentUser) {
+                    currentUser = savedCurrentUser;
+                    showUserInfo();
+                    hideAuthContainer();
+                    applyUserSkin(currentUser); // 应用用户皮肤
+                    initGameAfterLogin();
+                }
+            }
+            
+            // 切换登录/注册标签
+            authTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // 移除所有active类
+                    authTabs.forEach(t => t.classList.remove('active'));
+                    loginForm.classList.remove('active');
+                    registerForm.classList.remove('active');
+                    
+                    // 添加active类到当前标签
+                    tab.classList.add('active');
+                    if (tab.dataset.tab === 'login') {
+                        loginForm.classList.add('active');
+                    } else {
+                        registerForm.classList.add('active');
+                    }
+                    
+                    // 重置错误提示
+                    resetFormErrors();
+                });
             });
-            event.target.classList.add('selected');
             
-            markUnsaved();
-        }
-        
-        // 格式化文本
-        function formatText(command) {
-            document.getElementById('diaryContent').focus();
-            document.execCommand(command);
-            markUnsaved();
-        }
-        
-        // 更改字体大小
-        function changeFontSize(size) {
-            document.getElementById('diaryContent').style.fontSize = size + 'px';
-        }
-        
-        // 搜索日记
-        function searchDiaries() {
-            const keyword = document.getElementById('searchInput').value.toLowerCase();
-            const listElement = document.getElementById('diaryList');
-            
-            if (!keyword) {
-                loadDiaryList();
-                return;
+            // 重置表单错误提示
+            function resetFormErrors() {
+                loginUsernameError.classList.remove('show');
+                loginPasswordError.classList.remove('show');
+                loginError.classList.remove('show');
+                registerUsernameError.classList.remove('show');
+                registerPasswordError.classList.remove('show');
+                registerConfirmError.classList.remove('show');
+                registerError.classList.remove('show');
             }
             
-            listElement.innerHTML = '';
+            // 登录验证
+            function validateLogin() {
+                const username = document.getElementById('login-username').value.trim();
+                const password = document.getElementById('login-password').value;
+                
+                // 先清空所有错误
+                resetFormErrors();
+                
+                let isValid = true;
+                
+                // 验证用户名
+                if (!username) {
+                    loginUsernameError.textContent = '用户名不能为空';
+                    loginUsernameError.classList.add('show');
+                    isValid = false;
+                }
+                
+                // 验证密码
+                if (!password) {
+                    loginPasswordError.textContent = '密码不能为空';
+                    loginPasswordError.classList.add('show');
+                    isValid = false;
+                }
+                
+                // 验证用户是否存在且密码正确
+                if (isValid) {
+                    if (!window.jumpGameUsers[username] || window.jumpGameUsers[username] !== password) {
+                        loginError.classList.add('show');
+                        isValid = false;
+                    }
+                }
+                
+                return isValid;
+            }
             
-            const filtered = diaries.filter(diary => 
-                diary.title.toLowerCase().includes(keyword) || 
-                diary.content.toLowerCase().includes(keyword)
-            );
+            // 注册验证
+            function validateRegister() {
+                const username = document.getElementById('register-username').value.trim();
+                const password = document.getElementById('register-password').value;
+                const confirmPassword = document.getElementById('register-confirm-password').value;
+                
+                // 先清空所有错误
+                resetFormErrors();
+                
+                let isValid = true;
+                
+                // 验证用户名
+                if (!username) {
+                    registerUsernameError.textContent = '用户名不能为空';
+                    registerUsernameError.classList.add('show');
+                    isValid = false;
+                } else if (username.length < 2 || username.length > 10) {
+                    registerUsernameError.textContent = '用户名长度需在2-10个字符';
+                    registerUsernameError.classList.add('show');
+                    isValid = false;
+                } else if (window.jumpGameUsers[username]) {
+                    registerError.classList.add('show');
+                    isValid = false;
+                }
+                
+                // 验证密码
+                if (!password) {
+                    registerPasswordError.textContent = '密码不能为空';
+                    registerPasswordError.classList.add('show');
+                    isValid = false;
+                } else if (password.length < 6) {
+                    registerPasswordError.textContent = '密码长度不能少于6位';
+                    registerPasswordError.classList.add('show');
+                    isValid = false;
+                }
+                
+                // 验证确认密码
+                if (password !== confirmPassword) {
+                    registerConfirmError.classList.add('show');
+                    isValid = false;
+                }
+                
+                return isValid;
+            }
             
-            filtered.forEach(diary => {
-                const item = document.createElement('div');
-                item.className = 'diary-item';
-                item.onclick = () => openDiary(diary.id);
-                
-                const date = new Date(diary.date).toLocaleDateString('zh-CN');
-                
-                // 高亮关键词
-                let title = diary.title || '无标题';
-                let content = diary.content.substring(0, 100);
-                
-                const regex = new RegExp(`(${keyword})`, 'gi');
-                title = title.replace(regex, '<mark>$1</mark>');
-                content = content.replace(regex, '<mark>$1</mark>');
-                
-                item.innerHTML = `
-                    <div class="diary-date">${date}</div>
-                    <div class="diary-title">${title}</div>
-                    <div style="font-size: 12px; color: #666; margin-top: 5px;">
-                        ${content}${diary.content.length > 100 ? '...' : ''}
-                    </div>
-                `;
-                
-                listElement.appendChild(item);
+            // 登录按钮点击事件
+            loginBtn.addEventListener('click', () => {
+                if (validateLogin()) {
+                    const username = document.getElementById('login-username').value.trim();
+                    currentUser = username;
+                    
+                    // 保存当前登录用户
+                    localStorage.setItem('jumpGameCurrentUser', currentUser);
+                    
+                    // 更新用户信息显示
+                    showUserInfo();
+					
+                    // 应用用户皮肤
+                    applyUserSkin(currentUser);
+                    
+                    // 隐藏登录注册界面
+                    hideAuthContainer();
+                    
+                    // 初始化游戏
+                    initGameAfterLogin();
+                }
             });
-        }
-        
-        // 更新字数统计
-        function updateWordCount() {
-            const content = document.getElementById('diaryContent').value;
-            const chineseChars = content.match(/[\u4e00-\u9fa5]/g) || [];
-            const englishWords = content.match(/\b\w+\b/g) || [];
-            const total = chineseChars.length + englishWords.length;
             
-            document.getElementById('wordCount').textContent = `字数: ${total}`;
-        }
-        
-        // 初始化应用
-        window.onload = init;
+            // 注册按钮点击事件
+            registerBtn.addEventListener('click', () => {
+                if (validateRegister()) {
+                    const username = document.getElementById('register-username').value.trim();
+                    const password = document.getElementById('register-password').value;
+                    
+                    // 保存新用户
+                    window.jumpGameUsers[username] = password;
+                    localStorage.setItem('jumpGameUsers', JSON.stringify(window.jumpGameUsers));
+                    
+                    // 初始化用户最高分
+                    if (!userHighScores[username]) {
+                        userHighScores[username] = 0;
+                        localStorage.setItem('jumpGameHighScores', JSON.stringify(userHighScores));
+                    }
+					
+                    // 初始化用户皮肤
+                    if (!userSkins[username]) {
+                        userSkins[username] = 'pink';
+                        localStorage.setItem('userSkins', JSON.stringify(userSkins));
+                    }
+                    
+                    // 自动登录
+                    currentUser = username;
+                    localStorage.setItem('jumpGameCurrentUser', currentUser);
+                    
+                    // 更新用户信息显示
+                    showUserInfo();
+					
+                    // 应用用户皮肤
+                    applyUserSkin(currentUser);
+                    
+                    // 隐藏登录注册界面
+                    hideAuthContainer();
+                    
+                    // 初始化游戏
+                    initGameAfterLogin();
+                    
+                    // 提示注册成功
+                    alert('注册成功！欢迎加入萌萌跳跃～');
+                }
+            });
+			
+            // ========== 新增：个人中心事件绑定 ==========
+            // 打开个人中心
+            centerBtn.addEventListener('click', () => {
+                centerContainer.style.display = 'flex';
+                initSkinSelection(); // 初始化皮肤选择界面
+            });
+            
+            // 关闭个人中心
+            centerClose.addEventListener('click', () => {
+                centerContainer.style.display = 'none';
+            });
+            
+            // 点击个人中心外部关闭
+            centerContainer.addEventListener('click', (e) => {
+                if (e.target === centerContainer) {
+                    centerContainer.style.display = 'none';
+                }
+            });
+			
+            // 退出登录
+            logoutBtn.addEventListener('click', () => {
+                // 清除当前用户
+                currentUser = null;
+                localStorage.removeItem('jumpGameCurrentUser');
+                
+                // 隐藏用户信息
+                userInfo.style.display = 'none';
+				
+                // 关闭个人中心
+                centerContainer.style.display = 'none';
+                
+                // 显示登录注册界面
+                authContainer.style.display = 'flex';
+                
+                // 重置游戏
+                resetGame();
+                
+                // 重置表单
+                document.getElementById('login-username').value = '';
+                document.getElementById('login-password').value = '';
+                document.getElementById('register-username').value = '';
+                document.getElementById('register-password').value = '';
+                document.getElementById('register-confirm-password').value = '';
+                resetFormErrors();
+                
+                // 切换到登录标签
+                authTabs[0].click();
+            });
+            
+            // 显示用户信息
+            function showUserInfo() {
+                if (currentUser) {
+                    userName.textContent = currentUser;
+                    // 根据用户名首字母生成头像
+                    const firstChar = currentUser.charAt(0).toUpperCase();
+                    userAvatar.textContent = firstChar;
+                    userInfo.style.display = 'flex';
+                }
+            }
+            
+            // 隐藏登录注册界面
+            function hideAuthContainer() {
+                authContainer.style.display = 'none';
+            }
+            
+            // ====================== 游戏核心功能 ======================
+            
+            // 登录后初始化游戏
+            function initGameAfterLogin() {
+                // 加载用户最高分
+                loadUserHighScore();
+                
+                // 显示加载界面
+                loadingScreen.style.display = 'flex';
+                
+                // 初始化游戏
+                setTimeout(() => {
+                    initGameSize();
+                    createBackgroundParticles();
+                    hideLoadingScreen();
+                    
+                    // 初始化音频
+                    initAudio();
+                    
+                    // 启动游戏
+                    startGameTimers();
+                    
+                    // 绑定游戏控制事件
+                    bindGameEvents();
+                }, 1000);
+            }
+            
+            // 初始化游戏尺寸
+            function initGameSize() {
+                const screenHeight = window.innerHeight;
+                groundHeight = screenHeight * 0.08;
+                playerStartPos = groundHeight;
+                jumpHeight = Math.min(screenHeight * 0.28, 200); // 提高跳跃高度应对大型障碍物
+                
+                document.querySelector('.ground').style.height = `${groundHeight}px`;
+                player.style.bottom = `${groundHeight}px`;
+                document.querySelectorAll('.obstacle').forEach(obs => {
+                    obs.style.bottom = `${groundHeight}px`;
+                });
+            }
+            
+            // 创建背景粒子
+            function createBackgroundParticles() {
+                for (let i = 0; i < 15; i++) {
+                    const particle = document.createElement('div');
+                    particle.classList.add('particle');
+                    particle.style.left = `${Math.random() * 100}vw`;
+                    particle.style.top = `${Math.random() * 100}vh`;
+                    particle.style.animationDuration = `${Math.random() * 10 + 10}s`;
+                    backgroundParticles.appendChild(particle);
+                }
+            }
+            
+            // 隐藏加载界面
+            function hideLoadingScreen() {
+                loadingScreen.style.opacity = 0;
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 500);
+            }
+            
+            // 绑定游戏控制事件
+            function bindGameEvents() {
+                // 点击/触摸跳跃
+                document.addEventListener('click', jump);
+                document.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    jump();
+                });
+                
+                // 空格键跳跃
+                document.addEventListener('keydown', (e) => {
+                    if (e.code === 'Space') {
+                        e.preventDefault();
+                        jump();
+                    }
+                });
+                
+                // 音效切换
+                soundToggle.addEventListener('click', toggleSound);
+                
+                // 重新开始游戏
+                restartBtn.addEventListener('click', restartGame);
+                
+                // 窗口大小变化监听
+                window.addEventListener('resize', () => {
+                    initGameSize();
+                    
+                    if (gameRunning) {
+                        const aspectRatio = window.innerWidth / window.innerHeight;
+                        if (aspectRatio > 2) {
+                            gameSpeed = Math.min(gameSpeed, 7);
+                        } else if (aspectRatio < 1) {
+                            gameSpeed = Math.max(gameSpeed, 4.5);
+                        }
+                    }
+                });
+            }
+            
+            // 音效系统
+            let audioContext;
+            let jumpSound;
+            let hitSound;
+            let scoreSound;
+            let landSound;
+            let powerUpSound;
+            let highScoreSound;
+            let breakSound;
+            let slowMotionSound; // 新增：慢动作音效
+            
+            function initAudio() {
+                try {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // 创建音效
+                    jumpSound = createSound(800, 0.12, 0.06, 'sine');
+                    hitSound = createSound(400, 0.25, 0.12, 'square');
+                    scoreSound = createSound(1200, 0.09, 0.04, 'sine');
+                    landSound = createSound(500, 0.1, 0.05, 'triangle');
+                    powerUpSound = createSound(1500, 0.15, 0.07, 'sine');
+                    highScoreSound = createSound(1760, 0.15, 0.07, 'sine');
+                    breakSound = createSound(600, 0.2, 0.1, 'sawtooth'); // 破碎音效
+                    slowMotionSound = createSound(440, 0.3, 0.15, 'sine', 0.08); // 慢动作音效
+                } catch (e) {
+                    console.log('音频初始化失败:', e);
+                }
+            }
+            
+            // 创建音效辅助函数
+            function createSound(frequency = 440, duration = 0.1, decay = 0.05, type = 'sine', volume = 0.12) {
+                return function() {
+                    if (!soundEnabled || !audioContext) return;
+                    
+                    if (audioContext.state === 'suspended') {
+                        audioContext.resume();
+                    }
+                    
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.type = type;
+                    oscillator.frequency.value = frequency;
+                    
+                    gainNode.gain.value = volume;
+                    gainNode.gain.exponentialRampToValueAtTime(
+                        0.00001, audioContext.currentTime + duration
+                    );
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + duration);
+                };
+            }
+            
+            // 切换音效
+            function toggleSound() {
+                soundEnabled = !soundEnabled;
+                soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
+            }
+            
+            // 加载用户最高分
+            function loadUserHighScore() {
+                if (currentUser) {
+                    const userScore = userHighScores[currentUser] || 0;
+                    highScoreElement.textContent = `最高分: ${userScore} 个`;
+                }
+            }
+            
+            // 保存用户最高分
+            function saveUserHighScore(newScore) {
+                if (currentUser && newScore > (userHighScores[currentUser] || 0)) {
+                    userHighScores[currentUser] = newScore;
+                    localStorage.setItem('jumpGameHighScores', JSON.stringify(userHighScores));
+                    highScoreElement.textContent = `最高分: ${newScore} 个`;
+                    if (soundEnabled) highScoreSound();
+                }
+            }
+            
+            // 动态解锁易碎障碍物
+            function unlockBreakableObstacle() {
+                const breakableType = obstacleTypes.find(type => type.type === 'breakable');
+                if (breakableType && breakableType.spawnChance === 0) {
+                    breakableType.spawnChance = 0.1; // 解锁10%概率生成
+                    // 更新其他障碍物概率
+                    obstacleTypes.forEach(type => {
+                        if (type.type !== 'breakable' && type.spawnChance > 0) {
+                            type.spawnChance *= 0.95;
+                        }
+                    });
+                }
+            }
+            
+            // 跳跃核心逻辑
+            function jump() {
+                if (isJumping || !gameRunning || !currentUser) return;
+                
+                if (soundEnabled) jumpSound();
+                
+                // 随机星星偏移
+                player.style.setProperty('--star-offset', `${Math.random() * 10 - 5}px`);
+                
+                isJumping = true;
+                let currentPos = playerStartPos;
+                
+                player.classList.add('jumping');
+                player.classList.remove('peaking', 'falling', 'landing');
+                
+                // 上升阶段（慢动作时调整速度）
+                const jumpSpeed = isSlowMotion ? 4 : 6;
+                const jumpUp = setInterval(() => {
+                    currentPos += jumpSpeed;
+                    player.style.bottom = `${currentPos}px`;
+                    
+                    if (currentPos >= jumpHeight - 15) {
+                        player.classList.remove('jumping');
+                        player.classList.add('peaking');
+                    }
+                    
+                    if (currentPos >= jumpHeight) {
+                        clearInterval(jumpUp);
+                        
+                        // 最高点停留
+                        setTimeout(() => {
+                            player.classList.remove('peaking');
+                            player.classList.add('falling');
+                            
+                            // 下降阶段
+                            const jumpDown = setInterval(() => {
+                                currentPos -= (isSlowMotion ? 3 : 5);
+                                player.style.bottom = `${currentPos}px`;
+                                
+                                if (currentPos <= playerStartPos) {
+                                    clearInterval(jumpDown);
+                                    currentPos = playerStartPos;
+                                    player.style.bottom = `${currentPos}px`;
+                                    
+                                    // 落地效果
+                                    player.classList.remove('falling');
+                                    player.classList.add('landing');
+                                    if (soundEnabled) landSound();
+                                    
+                                    setTimeout(() => {
+                                        player.classList.remove('landing');
+                                        isJumping = false;
+                                    }, 200);
+                                }
+                            }, 16);
+                        }, isSlowMotion ? 200 : 120);
+                    }
+                }, 16);
+            }
+            
+            // 随机选择障碍物类型
+            function selectObstacleType() {
+                // 分数达到20解锁易碎障碍物
+                if (score >= 20) {
+                    unlockBreakableObstacle();
+                }
+                
+                const rand = Math.random();
+                let cumulativeProbability = 0;
+                
+                for (const type of obstacleTypes) {
+                    cumulativeProbability += type.spawnChance;
+                    if (rand <= cumulativeProbability) {
+                        return type;
+                    }
+                }
+                
+                // 默认返回基础障碍物
+                return obstacleTypes[0];
+            }
+            
+            // 创建障碍物
+            function createObstacle() {
+                if (!gameRunning || !currentUser) return;
+                
+                const obstacle = document.createElement('div');
+                obstacle.classList.add('obstacle');
+                
+                // 随机选择障碍物类型
+                const selectedType = selectObstacleType();
+                obstacle.classList.add(selectedType.type);
+                
+                // 为每个障碍物分配唯一ID
+                const obstacleId = `obs-${obstacleIdCounter++}`;
+                obstacle.dataset.id = obstacleId;
+                obstacle.dataset.obstacleType = selectedType.type;
+                
+                // 根据类型调整尺寸
+                const baseSize = Math.min(window.innerWidth * 0.05, 50);
+                const obstacleWidth = Math.floor(baseSize * selectedType.sizeMultiplier);
+                const obstacleHeight = selectedType.type === 'large' 
+                    ? Math.floor(baseSize * 1.8) 
+                    : Math.floor(baseSize * selectedType.sizeMultiplier);
+                
+                obstacle.style.width = `${obstacleWidth}px`;
+                obstacle.style.height = `${obstacleHeight}px`;
+                
+                // 初始位置
+                obstacle.style.left = `${window.innerWidth}px`;
+                obstacle.style.bottom = `${groundHeight}px`;
+                gameArea.appendChild(obstacle);
+                
+                // 特殊障碍物的初始配置
+                let floatDirection = 1;
+                
+                // 移动障碍物
+                const moveObstacle = () => {
+                    if (!gameRunning || !obstacle.parentNode) return;
+                    
+                    // 根据障碍物类型调整速度
+                    const speedMultiplier = selectedType.speedMultiplier;
+                    // 慢动作效果调整
+                    const currentSpeed = isSlowMotion ? (gameSpeed * speedMultiplier * 0.5) : (gameSpeed * speedMultiplier);
+                    // 速度提升效果调整
+                    const finalSpeed = isSpeedBoost ? (currentSpeed * 1.5) : currentSpeed;
+                    
+                    let currentLeft = parseFloat(obstacle.style.left) - finalSpeed;
+                    
+                    // 浮动障碍物的垂直移动
+                    if (selectedType.type === 'floating') {
+                        const currentBottom = parseFloat(obstacle.style.bottom);
+                        obstacle.style.bottom = `${currentBottom + (floatDirection * 0.5)}px`;
+                        
+                        if (currentBottom >= groundHeight + 30) floatDirection = -1;
+                        if (currentBottom <= groundHeight) floatDirection = 1;
+                    }
+                    
+                    obstacle.style.left = `${currentLeft}px`;
+                    
+                    // 检测是否跳过障碍物
+                    const playerRect = player.getBoundingClientRect();
+                    const obstacleRect = obstacle.getBoundingClientRect();
+                    const playerX = playerRect.left + playerRect.width / 2;
+                    const obstacleX = obstacleRect.left + obstacleRect.width / 2;
+                    
+                    // 当障碍物超过玩家且未记录过时，增加分数
+                    if (obstacleX < playerX && !skippedObstacleIds.has(obstacleId)) {
+                        skippedObstacleIds.add(obstacleId);
+                        updateScore();
+                    }
+                    
+                    // 碰撞检测
+                    if (checkCollision(playerRect, obstacleRect) && !isInvincible) {
+                        // 易碎障碍物处理
+                        if (selectedType.type === 'breakable') {
+                            obstacle.classList.add('breaking');
+                            if (soundEnabled) breakSound();
+                            setTimeout(() => {
+                                if (obstacle.parentNode) {
+                                    obstacle.parentNode.removeChild(obstacle);
+                                }
+                            }, 300);
+                        } else {
+                            gameOver();
+                        }
+                    }
+                    
+                    // 移除超出屏幕的障碍物
+                    if (currentLeft < -obstacleWidth) {
+                        if (obstacle.parentNode) {
+                            obstacle.parentNode.removeChild(obstacle);
+                        }
+                        skippedObstacleIds.delete(obstacleId);
+                    } else {
+                        requestAnimationFrame(moveObstacle);
+                    }
+                };
+                
+                moveObstacle();
+            }
+            
+            // 碰撞检测
+            function checkCollision(rect1, rect2) {
+                return !(
+                    rect1.right < rect2.left ||
+                    rect1.left > rect2.right ||
+                    rect1.bottom < rect2.top ||
+                    rect1.top > rect2.bottom
+                );
+            }
+            
+            // 更新分数
+            function updateScore() {
+                const scoreIncrement = isDoubleScore ? 2 : 1;
+                score += scoreIncrement;
+                
+                // 分数动画
+                scoreElement.textContent = score;
+                scoreElement.classList.add('updating');
+                setTimeout(() => {
+                    scoreElement.classList.remove('updating');
+                }, 100);
+                
+                // 分数爆炸特效
+                const scorePop = document.createElement('div');
+                scorePop.classList.add('score-pop');
+                scorePop.textContent = `+${scoreIncrement}`;
+                scorePop.style.left = `${15}vw`;
+                scorePop.style.top = `${20}vh`;
+                gameArea.appendChild(scorePop);
+                
+                setTimeout(() => {
+                    if (scorePop.parentNode) {
+                        scorePop.parentNode.removeChild(scorePop);
+                    }
+                }, 1000);
+                
+                if (soundEnabled) scoreSound();
+                
+                // 难度递增
+                if (score % 10 === 0) {
+                    gameSpeed = Math.min(gameSpeed + 0.2, 8);
+                    obstacleInterval = Math.max(obstacleInterval - 50, 800);
+                    
+                    // 重置定时器以应用新的间隔
+                    if (gameRunning) {
+                        clearInterval(obstacleTimer);
+                        obstacleTimer = setInterval(createObstacle, obstacleInterval);
+                    }
+                }
+            }
+            
+            // 创建道具
+            function createPowerUp() {
+                if (!gameRunning || !currentUser || Math.random() > powerUpConfig.spawnChance) return;
+                
+                const powerUpTypes = powerUpConfig.types;
+                let rand = Math.random();
+                let cumulativeProbability = 0;
+                let selectedPowerUp = null;
+                
+                // 随机选择道具类型
+                for (const type of powerUpTypes) {
+                    cumulativeProbability += type.chance;
+                    if (rand <= cumulativeProbability) {
+                        selectedPowerUp = type;
+                        break;
+                    }
+                }
+                
+                if (!selectedPowerUp) return;
+                
+                const powerUp = document.createElement('div');
+                powerUp.classList.add('power-up', selectedPowerUp.type);
+                powerUp.textContent = selectedPowerUp.icon;
+                
+                // 随机位置
+                const baseSize = Math.min(window.innerWidth * 0.04, 45);
+                powerUp.style.width = `${baseSize}px`;
+                powerUp.style.height = `${baseSize}px`;
+                powerUp.style.left = `${window.innerWidth}px`;
+                powerUp.style.bottom = `${groundHeight + Math.random() * 100}px`;
+                
+                gameArea.appendChild(powerUp);
+                
+                // 移动道具
+                const movePowerUp = () => {
+                    if (!gameRunning || !powerUp.parentNode) return;
+                    
+                    const currentSpeed = isSlowMotion ? (gameSpeed * 0.5) : gameSpeed;
+                    const finalSpeed = isSpeedBoost ? (currentSpeed * 1.5) : currentSpeed;
+                    
+                    let currentLeft = parseFloat(powerUp.style.left) - finalSpeed;
+                    powerUp.style.left = `${currentLeft}px`;
+                    
+                    // 道具碰撞检测
+                    const playerRect = player.getBoundingClientRect();
+                    const powerUpRect = powerUp.getBoundingClientRect();
+                    
+                    if (checkCollision(playerRect, powerUpRect)) {
+                        activatePowerUp(selectedPowerUp);
+                        if (powerUp.parentNode) {
+                            powerUp.parentNode.removeChild(powerUp);
+                        }
+                        return;
+                    }
+                    
+                    // 移除超出屏幕的道具
+                    if (currentLeft < -baseSize) {
+                        if (powerUp.parentNode) {
+                            powerUp.parentNode.removeChild(powerUp);
+                        }
+                    } else {
+                        requestAnimationFrame(movePowerUp);
+                    }
+                };
+                
+                movePowerUp();
+            }
+            
+            // 激活道具
+            function activatePowerUp(powerUp) {
+                if (soundEnabled) powerUpSound();
+                
+                // 清除现有道具效果
+                clearPowerUps();
+                
+                switch (powerUp.type) {
+                    case 'speed-boost':
+                        isSpeedBoost = true;
+                        player.style.filter = 'drop-shadow(0 0 10px #ffeb3b)';
+                        setTimeout(() => {
+                            isSpeedBoost = false;
+                            player.style.filter = '';
+                        }, powerUp.duration);
+                        break;
+                        
+                    case 'shield':
+                        isInvincible = true;
+                        shieldElement = document.createElement('div');
+                        shieldElement.classList.add('player-shield');
+                        player.appendChild(shieldElement);
+                        setTimeout(() => {
+                            isInvincible = false;
+                            if (shieldElement && shieldElement.parentNode) {
+                                shieldElement.parentNode.removeChild(shieldElement);
+                                shieldElement = null;
+                            }
+                        }, powerUp.duration);
+                        break;
+                        
+                    case 'double-score':
+                        isDoubleScore = true;
+                        scoreElement.style.color = '#ff9800';
+                        setTimeout(() => {
+                            isDoubleScore = false;
+                            scoreElement.style.color = '#7b1fa2';
+                        }, powerUp.duration);
+                        break;
+                        
+                    case 'slow-motion':
+                        isSlowMotion = true;
+                        gameArea.style.filter = 'sepia(20%)';
+                        if (soundEnabled) slowMotionSound();
+                        setTimeout(() => {
+                            isSlowMotion = false;
+                            gameArea.style.filter = '';
+                        }, powerUp.duration);
+                        break;
+                }
+            }
+            
+            // 清除所有道具效果
+            function clearPowerUps() {
+                isSpeedBoost = false;
+                isDoubleScore = false;
+                isSlowMotion = false;
+                
+                if (isInvincible && shieldElement) {
+                    isInvincible = false;
+                    if (shieldElement.parentNode) {
+                        shieldElement.parentNode.removeChild(shieldElement);
+                        shieldElement = null;
+                    }
+                }
+                
+                player.style.filter = '';
+                scoreElement.style.color = '#7b1fa2';
+                gameArea.style.filter = '';
+            }
+            
+            // 游戏结束
+            function gameOver() {
+                if (!gameRunning) return;
+                
+                gameRunning = false;
+                clearInterval(obstacleTimer);
+                clearInterval(powerUpTimer);
+                clearPowerUps();
+                
+                if (soundEnabled) hitSound();
+                
+                // 保存最高分
+                saveUserHighScore(score);
+                
+                // 显示游戏结束界面
+                finalScoreElement.textContent = score;
+                gameOverScreen.style.display = 'block';
+                
+                // 震动效果
+                gameContainer.style.animation = 'vibrate 0.5s ease-in-out';
+                setTimeout(() => {
+                    gameContainer.style.animation = '';
+                }, 500);
+            }
+            
+            // 重置游戏
+            function resetGame() {
+                // 清除所有障碍物和道具
+                document.querySelectorAll('.obstacle').forEach(obs => obs.remove());
+                document.querySelectorAll('.power-up').forEach(pu => pu.remove());
+                document.querySelectorAll('.score-pop').forEach(sp => sp.remove());
+                
+                // 重置游戏状态
+                score = 0;
+                gameSpeed = 5;
+                obstacleInterval = 1800;
+                gameRunning = true;
+                isJumping = false;
+                skippedObstacleIds.clear();
+                obstacleIdCounter = 0;
+                clearPowerUps();
+                
+                // 重置UI
+                scoreElement.textContent = '0';
+                gameOverScreen.style.display = 'none';
+                player.style.bottom = `${playerStartPos}px`;
+                player.className = `player skin-${getUserSkin(currentUser)}`; // 重置时保留用户皮肤
+                gameContainer.style.animation = '';
+            }
+            
+            // 重新开始游戏
+            function restartGame() {
+                resetGame();
+                
+                // 重启定时器
+                startGameTimers();
+                
+                // 隐藏游戏结束界面
+                gameOverScreen.style.display = 'none';
+            }
+            
+            // 启动游戏定时器
+            function startGameTimers() {
+                if (obstacleTimer) clearInterval(obstacleTimer);
+                if (powerUpTimer) clearInterval(powerUpTimer);
+                
+                obstacleTimer = setInterval(createObstacle, obstacleInterval);
+                powerUpTimer = setInterval(createPowerUp, powerUpConfig.spawnInterval);
+            }
+            
+            // 初始化用户数据
+            initUserData();
+        });
     </script>
 </body>
 </html>
