@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>像素冒险</title>
+    <title>像素冒险 | Pixel Adventure</title>
     <style>
         * {
             margin: 0;
@@ -15,40 +15,76 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background-color: #333;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
             font-family: "Courier New", monospace;
             min-height: 100vh;
             overflow: hidden;
             padding: 20px;
         }
+        /* 游戏标题 */
+        .game-title {
+            color: #fff;
+            font-size: 28px;
+            text-align: center;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0 #000, 4px 4px 0 #ff2a6d;
+            letter-spacing: 2px;
+        }
+        /* 画布容器 - 像素边框 + 阴影 */
+        .canvas-container {
+            position: relative;
+            border: 8px solid #fff;
+            border-radius: 4px;
+            box-shadow: 0 0 30px rgba(255, 42, 109, 0.5), inset 0 0 20px rgba(0, 0, 0, 0.8);
+            background: #000;
+        }
         canvas {
-            border: 2px solid #000;
+            border: 2px solid #333;
             background-color: #ccc;
             image-rendering: pixelated;
             max-width: 100%;
             max-height: 100%;
+            display: block;
         }
         .controls {
             color: #fff;
-            margin-top: 10px;
+            margin-top: 15px;
             font-size: 14px;
             z-index: 10;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px 15px;
+            border-radius: 4px;
+            border: 1px solid #ff2a6d;
         }
-        /* 界面样式 */
+        /* 界面样式 - 像素风格美化 */
         .screen {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: rgba(0,0,0,0.8);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(22, 33, 62, 0.95));
             color: #fff;
             padding: 40px;
             border-radius: 8px;
             text-align: center;
             z-index: 100;
+            border: 4px solid #ff2a6d;
+            box-shadow: 0 0 50px rgba(255, 42, 109, 0.8);
+        }
+        .screen h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: #ffd700;
+            text-shadow: 2px 2px 0 #ff2a6d, 4px 4px 0 #000;
+            letter-spacing: 3px;
+        }
+        .screen p {
+            font-size: 18px;
+            margin-bottom: 30px;
+            color: #f0f0f0;
         }
         .btn {
-            background-color: #666;
+            background: linear-gradient(135deg, #ff2a6d, #ff4757);
             color: #fff;
             border: none;
             padding: 12px 24px;
@@ -57,45 +93,264 @@
             cursor: pointer;
             border-radius: 4px;
             font-family: "Courier New", monospace;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            border: 2px solid #fff;
+            box-shadow: 3px 3px 0 #000;
         }
         .btn:hover {
-            background-color: #99f;
+            background: linear-gradient(135deg, #ff4757, #ff6b81);
+            transform: translate(-2px, -2px);
+            box-shadow: 5px 5px 0 #000;
+        }
+        .btn:active {
+            transform: translate(1px, 1px);
+            box-shadow: 1px 1px 0 #000;
         }
         .btn:disabled {
-            background-color: #444;
+            background: linear-gradient(135deg, #444, #666);
             cursor: not-allowed;
             color: #888;
+            border-color: #888;
+            transform: none;
+            box-shadow: none;
         }
         .level-btn {
             width: 60px;
             height: 60px;
             margin: 15px;
             font-size: 20px;
+            border-radius: 8px;
         }
-        /* 转场效果 */
+        /* 转场效果 - 优化 */
         .transition {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #000;
+            background: linear-gradient(45deg, #000, #ff2a6d);
             opacity: 0;
             z-index: 99;
             pointer-events: none;
             transition: opacity 0.5s ease;
         }
+        /* 生命值显示 */
+        .health-bar {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            z-index: 10;
+        }
+        .heart {
+            width: 20px;
+            height: 20px;
+            margin-left: 5px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ff2a6d'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") no-repeat center;
+            background-size: contain;
+        }
+        .heart.empty {
+            filter: grayscale(100%) opacity(0.5);
+        }
+        /* 游戏中皮肤选择面板 - 核心新增 */
+        .in-game-skin-panel {
+            position: absolute;
+            top: 70px;
+            right: 20px;
+            width: 300px;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(22, 33, 62, 0.9));
+            border: 3px solid #ff2a6d;
+            border-radius: 8px;
+            padding: 15px;
+            z-index: 50;
+            display: none;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .in-game-skin-panel.active {
+            display: block;
+        }
+        .skin-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #ffd700;
+            padding-bottom: 10px;
+        }
+        .skin-panel-title {
+            color: #ffd700;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .close-skin-panel {
+            background: #ff2a6d;
+            color: #fff;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        /* 皮肤列表样式 */
+        .in-game-skin-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .in-game-skin-item {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #333;
+            border-radius: 6px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .in-game-skin-item.unlocked {
+            border-color: #ffd700;
+        }
+        .in-game-skin-item.selected {
+            border-color: #ff2a6d;
+            background: rgba(255, 42, 109, 0.2);
+        }
+        .in-game-skin-item:hover {
+            transform: translateX(5px);
+        }
+        .skin-top {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .skin-preview-small {
+            width: 30px;
+            height: 30px;
+            border: 2px solid #000;
+            margin-right: 10px;
+        }
+        .skin-info {
+            flex: 1;
+        }
+        .skin-name-small {
+            font-size: 14px;
+            font-weight: bold;
+            color: #fff;
+        }
+        .skin-unlock-small {
+            font-size: 12px;
+            color: #888;
+        }
+        .in-game-skin-item.unlocked .skin-unlock-small {
+            color: #4CAF50;
+        }
+        .skin-effects {
+            font-size: 12px;
+            color: #ffd700;
+            margin-top: 5px;
+            padding-left: 10px;
+        }
+        .current-tag {
+            background: #ff2a6d;
+            color: #fff;
+            font-size: 10px;
+            padding: 2px 5px;
+            border-radius: 3px;
+            margin-left: 5px;
+        }
+        /* 皮肤选择界面样式 */
+        .skin-select-screen {
+            width: 500px;
+            max-width: 90%;
+        }
+        .skin-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .skin-item {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .skin-item.unlocked {
+            border-color: #ffd700;
+        }
+        .skin-item.selected {
+            border-color: #ff2a6d;
+            background: rgba(255, 42, 109, 0.2);
+            box-shadow: 0 0 15px rgba(255, 42, 109, 0.5);
+        }
+        .skin-item:hover {
+            transform: scale(1.05);
+        }
+        .skin-preview {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 10px;
+            border: 2px solid #000;
+        }
+        .skin-name {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .skin-unlock-condition {
+            font-size: 12px;
+            color: #888;
+        }
+        .skin-item.unlocked .skin-unlock-condition {
+            color: #4CAF50;
+            content: "已解锁";
+        }
+        .current-skin-indicator {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #ff2a6d;
+            color: #fff;
+            font-size: 10px;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas" width="640" height="480"></canvas>
-    <div class="controls">操作：← → 移动 | ↑ 跳跃 | R 重新开始</div>
+    <h1 class="game-title">像素冒险 | Pixel Adventure</h1>
+    
+    <div class="canvas-container">
+        <canvas id="gameCanvas" width="640" height="480"></canvas>
+        <!-- 生命值显示 -->
+        <div class="health-bar">
+            <div class="heart" id="heart1"></div>
+            <div class="heart" id="heart2"></div>
+            <div class="heart" id="heart3"></div>
+        </div>
+        <!-- 游戏中皮肤选择面板 - 核心新增 -->
+        <div class="in-game-skin-panel" id="inGameSkinPanel">
+            <div class="skin-panel-header">
+                <div class="skin-panel-title">皮肤选择 (按S关闭)</div>
+                <button class="close-skin-panel" onclick="toggleSkinPanel()">×</button>
+            </div>
+            <div class="in-game-skin-list" id="inGameSkinList"></div>
+        </div>
+    </div>
+    
+    <div class="controls">操作：← → 移动 | ↑ 跳跃 | R 重新开始 | S 打开皮肤面板 | 躲避怪兽和尖刺！</div>
     
     <!-- 开始界面 -->
     <div id="startScreen" class="screen">
         <h1>像素冒险</h1>
-        <p>收集所有金币，避开尖刺，抵达终点！</p>
+        <p>收集所有金币，避开尖刺和怪兽，抵达终点！<br>每关都有新的挑战在等你！</p>
         <button class="btn" onclick="showLevelSelect()">开始游戏</button>
+        <button class="btn" onclick="showSkinSelect()">皮肤选择</button>
     </div>
     
     <!-- 关卡选择界面 -->
@@ -110,7 +365,15 @@
         <h1>挑战成功！🎉</h1>
         <p id="winMessage">第一关所有金币已收集，你真棒！</p>
         <button class="btn" onclick="replayCurrentLevel()">再玩一次</button>
-        <button class="btn" id="nextLevelBtn" onclick="loadLevel(1)">下一关</button>
+        <button class="btn" id="nextLevelBtn">下一关</button>
+    </div>
+    
+    <!-- 皮肤选择界面 -->
+    <div id="skinSelectScreen" class="screen skin-select-screen" style="display: none;">
+        <h1>皮肤选择</h1>
+        <p>收集不同的皮肤来更换你的外观！</p>
+        <div class="skin-grid" id="skinGrid"></div>
+        <button class="btn" onclick="showStartScreen()">返回</button>
     </div>
     
     <!-- 转场遮罩 -->
@@ -131,9 +394,26 @@
         let keys = {};
         let coinCount = 0;
         let unlockedLevels = JSON.parse(localStorage.getItem('unlockedLevels')) || [true, false, false];
+        let monsters = [];
+        let playerInvulnerable = false;
+        let invulnerableTimer = 0;
+        let playerHealth = 3;
+        let coinAnimationFrames = [];
+        let particles = [];
+        let celebrationParticles = [];
+        let jumpParticleCooldown = 0;
+        let showSkinPanel = false; // 游戏中皮肤面板显示状态
         
-        // 角色配置（最终优化版：三关通用，手感流畅）
-        const player = {
+        // 皮肤系统核心数据
+        let skinData = {
+            unlockedSkins: JSON.parse(localStorage.getItem('unlockedSkins')) || ['default'],
+            currentSkin: localStorage.getItem('currentSkin') || 'default',
+            totalCoinsCollected: parseInt(localStorage.getItem('totalCoinsCollected')) || 0,
+            totalLevelsCompleted: parseInt(localStorage.getItem('totalLevelsCompleted')) || 0
+        };
+
+        // 角色配置（基础配置，皮肤会覆盖这些属性）
+        let player = {
             x: 50,
             y: 410,
             size: 12,
@@ -141,21 +421,99 @@
             jumpPower: 10.6,
             gravity: 0.46,
             velocityY: 0,
-            onGround: false
+            onGround: false,
+            color: '#00f',
+            skin: 'default'
         };
 
-        // 关卡数据（最终修复版：三关布局合理，难度渐进）
+        // 皮肤定义（新增详细功能说明）
+        const skins = [
+            {
+                id: 'default',
+                name: '默认皮肤',
+                color: '#00f',
+                size: 12,
+                speed: 3.6,
+                jumpPower: 10.6,
+                unlockCondition: '初始解锁',
+                unlocked: true,
+                specialEffect: null,
+                effectsDesc: '基础属性，无特殊效果'
+            },
+            {
+                id: 'red',
+                name: '红色勇士',
+                color: '#f00',
+                size: 12,
+                speed: 3.8,
+                jumpPower: 10.4,
+                unlockCondition: '收集10个金币',
+                unlocked: false,
+                specialEffect: 'jumpParticles',
+                effectsDesc: '✦ 移动速度+0.2 ✦ 跳跃粒子变为红色 ✦ 跳跃高度-0.2'
+            },
+            {
+                id: 'yellow',
+                name: '黄色闪电',
+                color: '#ff0',
+                size: 10,
+                speed: 4.2,
+                jumpPower: 11.0,
+                unlockCondition: '完成第1关',
+                unlocked: false,
+                specialEffect: 'speed',
+                effectsDesc: '✦ 体型变小(10px) ✦ 移动速度+0.6 ✦ 跳跃高度+0.4'
+            },
+            {
+                id: 'green',
+                name: '绿色忍者',
+                color: '#0f0',
+                size: 11,
+                speed: 4.0,
+                jumpPower: 10.8,
+                unlockCondition: '收集30个金币',
+                unlocked: false,
+                specialEffect: 'invulnerability',
+                effectsDesc: '✦ 体型变小(11px) ✦ 移动速度+0.4 ✦ 受伤无敌时间延长1秒 ✦ 跳跃高度+0.2'
+            },
+            {
+                id: 'purple',
+                name: '紫色幽灵',
+                color: '#a0f',
+                size: 12,
+                speed: 3.9,
+                jumpPower: 10.7,
+                unlockCondition: '完成第2关',
+                unlocked: false,
+                specialEffect: 'ghost',
+                effectsDesc: '✦ 半透明效果 ✦ 移动速度+0.3 ✦ 跳跃高度+0.1'
+            },
+            {
+                id: 'orange',
+                name: '橙色坦克',
+                color: '#f80',
+                size: 14,
+                speed: 3.4,
+                jumpPower: 10.2,
+                unlockCondition: '收集50个金币',
+                unlocked: false,
+                specialEffect: 'health',
+                effectsDesc: '✦ 体型变大(14px) ✦ 生命值+1 ✦ 移动速度-0.2 ✦ 跳跃高度-0.4'
+            }
+        ];
+
+        // 关卡数据
         const levelsData = [
             // 第一关：基础入门
             {
                 platforms: [
-                    {id:1, x:0, y:440, w:200, h:40},
-                    {id:2, x:250, y:400, w:100, h:20},
-                    {id:3, x:380, y:350, w:100, h:20},
-                    {id:4, x:520, y:300, w:100, h:20},
-                    {id:5, x:450, y:250, w:100, h:20},
-                    {id:6, x:200, y:300, w:100, h:20},
-                    {id:7, x:600, y:200, w:40, h:20, color: '#f00'} // 终点平台：红色标记
+                    {id:1, x:0, y:440, w:200, h:40, color: '#4CAF50'},
+                    {id:2, x:250, y:400, w:100, h:20, color: '#4CAF50'},
+                    {id:3, x:380, y:350, w:100, h:20, color: '#2196F3'},
+                    {id:4, x:520, y:300, w:100, h:20, color: '#2196F3'},
+                    {id:5, x:450, y:250, w:100, h:20, color: '#FF9800'},
+                    {id:6, x:200, y:300, w:100, h:20, color: '#FF9800'},
+                    {id:7, x:600, y:200, w:40, h:20, color: '#f00'}
                 ],
                 spikes: [
                     {platformId:1, x:180, count:2, size:10},
@@ -168,17 +526,21 @@
                     {x:610, y:180, size:8}, {x:300, y:380, size:8}, {x:400, y:330, size:8},
                     {x:540, y:280, size:8}, {x:470, y:230, size:8}, {x:220, y:280, size:8}
                 ],
-                bgColor: '#ccc'
+                monsters: [
+                    {x: 380, y: 330, size: 14, speed: 1.2, direction: 1, minX: 380, maxX: 480, color: '#e74c3c'}
+                ],
+                bgColor: '#e0f7fa',
+                bgGradient: true
             },
             // 第二关：进阶挑战
             {
                 platforms: [
-                    {id:1, x:0, y:440, w:180, h:40},
-                    {id:2, x:220, y:390, w:100, h:20},
-                    {id:3, x:350, y:330, w:100, h:20},
-                    {id:4, x:480, y:270, w:100, h:20},
-                    {id:5, x:300, y:220, w:100, h:20},
-                    {id:6, x:500, y:180, w:100, h:20},
+                    {id:1, x:0, y:440, w:180, h:40, color: '#4CAF50'},
+                    {id:2, x:220, y:390, w:100, h:20, color: '#2196F3'},
+                    {id:3, x:350, y:330, w:100, h:20, color: '#FF9800'},
+                    {id:4, x:480, y:270, w:100, h:20, color: '#9C27B0'},
+                    {id:5, x:300, y:220, w:100, h:20, color: '#FF9800'},
+                    {id:6, x:500, y:180, w:100, h:20, color: '#2196F3'},
                     {id:7, x:250, y:150, w:60, h:20, color: '#f00'}
                 ],
                 spikes: [
@@ -193,17 +555,22 @@
                     {x:100, y:410, size:8}, {x:230, y:370, size:8}, {x:360, y:310, size:8},
                     {x:490, y:250, size:8}, {x:310, y:200, size:8}, {x:270, y:130, size:8}
                 ],
-                bgColor: '#a8d8ff'
+                monsters: [
+                    {x: 220, y: 370, size: 14, speed: 1.5, direction: 1, minX: 220, maxX: 320, color: '#e74c3c'},
+                    {x: 480, y: 250, size: 14, speed: 1.8, direction: -1, minX: 480, maxX: 580, color: '#e74c3c'}
+                ],
+                bgColor: '#a8d8ff',
+                bgGradient: true
             },
             // 第三关：终极挑战
             {
                 platforms: [
-                    {id:1, x:0, y:440, w:150, h:40},
-                    {id:2, x:180, y:380, w:90, h:20},
-                    {id:3, x:300, y:320, w:90, h:20},
-                    {id:4, x:420, y:260, w:90, h:20},
-                    {id:5, x:300, y:200, w:90, h:20},
-                    {id:6, x:380, y:140, w:90, h:20},
+                    {id:1, x:0, y:440, w:150, h:40, color: '#9C27B0'},
+                    {id:2, x:180, y:380, w:90, h:20, color: '#FF9800'},
+                    {id:3, x:300, y:320, w:90, h:20, color: '#2196F3'},
+                    {id:4, x:420, y:260, w:90, h:20, color: '#4CAF50'},
+                    {id:5, x:300, y:200, w:90, h:20, color: '#FF9800'},
+                    {id:6, x:380, y:140, w:90, h:20, color: '#9C27B0'},
                     {id:7, x:520, y:80, w:60, h:20, color: '#f00'}
                 ],
                 spikes: [
@@ -219,7 +586,13 @@
                     {x:70, y:410, size:8}, {x:190, y:360, size:8}, {x:310, y:300, size:8},
                     {x:430, y:240, size:8}, {x:290, y:180, size:8}, {x:540, y:60, size:8}
                 ],
-                bgColor: '#ffd8a8'
+                monsters: [
+                    {x: 180, y: 360, size: 14, speed: 2.0, direction: 1, minX: 180, maxX: 270, color: '#e74c3c'},
+                    {x: 300, y: 300, size: 14, speed: 2.2, direction: -1, minX: 300, maxX: 390, color: '#e74c3c'},
+                    {x: 380, y: 120, size: 14, speed: 2.5, direction: 1, minX: 380, maxX: 470, color: '#e74c3c'}
+                ],
+                bgColor: '#ffd8a8',
+                bgGradient: true
             }
         ];
 
@@ -233,9 +606,214 @@
         const startScreen = document.getElementById('startScreen');
         const levelSelectScreen = document.getElementById('levelSelectScreen');
         const winScreen = document.getElementById('winScreen');
+        const skinSelectScreen = document.getElementById('skinSelectScreen');
+        const inGameSkinPanel = document.getElementById('inGameSkinPanel');
+        const inGameSkinList = document.getElementById('inGameSkinList');
         const winMessage = document.getElementById('winMessage');
         const nextLevelBtn = document.getElementById('nextLevelBtn');
         const transition = document.getElementById('transition');
+        const hearts = [
+            document.getElementById('heart1'),
+            document.getElementById('heart2'),
+            document.getElementById('heart3')
+        ];
+
+        // ==================== 皮肤系统核心功能 ====================
+        // 初始化皮肤数据
+        function initSkinData() {
+            // 检查皮肤解锁条件
+            skins.forEach(skin => {
+                if (skin.id === 'default') {
+                    skin.unlocked = true;
+                    return;
+                }
+
+                skin.unlocked = skinData.unlockedSkins.includes(skin.id);
+                
+                // 自动解锁满足条件的皮肤
+                if (!skin.unlocked) {
+                    if (skin.unlockCondition.includes('收集') && skin.unlockCondition.includes('金币')) {
+                        const requiredCoins = parseInt(skin.unlockCondition.match(/\d+/)[0]);
+                        if (skinData.totalCoinsCollected >= requiredCoins) {
+                            unlockSkin(skin.id);
+                        }
+                    } else if (skin.unlockCondition.includes('完成第') && skin.unlockCondition.includes('关')) {
+                        const requiredLevel = parseInt(skin.unlockCondition.match(/\d+/)[0]);
+                        if (skinData.totalLevelsCompleted >= requiredLevel) {
+                            unlockSkin(skin.id);
+                        }
+                    }
+                }
+            });
+
+            // 应用当前皮肤
+            applySkin(skinData.currentSkin);
+            // 初始化游戏中皮肤面板
+            renderInGameSkinPanel();
+        }
+
+        // 切换游戏中皮肤面板显示/隐藏
+        function toggleSkinPanel() {
+            showSkinPanel = !showSkinPanel;
+            if (showSkinPanel) {
+                inGameSkinPanel.classList.add('active');
+                renderInGameSkinPanel();
+            } else {
+                inGameSkinPanel.classList.remove('active');
+            }
+        }
+
+        // 渲染游戏中皮肤面板
+        function renderInGameSkinPanel() {
+            inGameSkinList.innerHTML = '';
+
+            skins.forEach(skin => {
+                const skinItem = document.createElement('div');
+                skinItem.className = `in-game-skin-item ${skin.unlocked ? 'unlocked' : ''} ${skin.id === skinData.currentSkin ? 'selected' : ''}`;
+                
+                // 只有已解锁的皮肤可点击切换
+                if (skin.unlocked) {
+                    skinItem.onclick = () => {
+                        applySkin(skin.id);
+                        renderInGameSkinPanel(); // 刷新面板状态
+                    };
+                }
+
+                const unlockText = skin.unlocked ? '已解锁' : skin.unlockCondition;
+                const currentTag = skin.id === skinData.currentSkin ? '<span class="current-tag">当前</span>' : '';
+
+                skinItem.innerHTML = `
+                    <div class="skin-top">
+                        <div class="skin-preview-small" style="background-color: ${skin.color};"></div>
+                        <div class="skin-info">
+                            <div class="skin-name-small">${skin.name} ${currentTag}</div>
+                            <div class="skin-unlock-small">${unlockText}</div>
+                        </div>
+                    </div>
+                    <div class="skin-effects">${skin.effectsDesc}</div>
+                `;
+
+                inGameSkinList.appendChild(skinItem);
+            });
+        }
+
+        // 解锁皮肤
+        function unlockSkin(skinId) {
+            if (!skinData.unlockedSkins.includes(skinId)) {
+                skinData.unlockedSkins.push(skinId);
+                localStorage.setItem('unlockedSkins', JSON.stringify(skinData.unlockedSkins));
+                
+                const skin = skins.find(s => s.id === skinId);
+                if (skin) {
+                    skin.unlocked = true;
+                }
+                
+                // 更新所有皮肤面板
+                renderSkinSelectScreen();
+                renderInGameSkinPanel();
+            }
+        }
+
+        // 应用皮肤（游戏中实时生效）
+        function applySkin(skinId) {
+            const skin = skins.find(s => s.id === skinId);
+            if (!skin || !skin.unlocked) return;
+
+            // 保存当前皮肤
+            skinData.currentSkin = skinId;
+            localStorage.setItem('currentSkin', skinId);
+            player.skin = skinId;
+
+            // 应用皮肤属性（实时生效）
+            player.color = skin.color;
+            player.size = skin.size;
+            player.speed = skin.speed;
+            player.jumpPower = skin.jumpPower;
+
+            // 应用皮肤特殊效果
+            applySkinSpecialEffects(skin);
+
+            // 更新所有皮肤面板
+            renderSkinSelectScreen();
+            renderInGameSkinPanel();
+            updateHealthDisplay(); // 生命值可能变化
+        }
+
+        // 应用皮肤特殊效果
+        function applySkinSpecialEffects(skin) {
+            // 重置所有特殊效果
+            player.extraHealth = 0;
+            player.extraInvulnerability = 0;
+
+            // 应用当前皮肤的特殊效果
+            switch (skin.specialEffect) {
+                case 'health':
+                    player.extraHealth = 1;
+                    break;
+                case 'invulnerability':
+                    player.extraInvulnerability = 30; // 额外30帧无敌时间
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        // 保存皮肤统计数据
+        function saveSkinStats(coinsCollected, levelCompleted) {
+            skinData.totalCoinsCollected += coinsCollected;
+            if (levelCompleted) {
+                skinData.totalLevelsCompleted++;
+            }
+
+            localStorage.setItem('totalCoinsCollected', skinData.totalCoinsCollected);
+            localStorage.setItem('totalLevelsCompleted', skinData.totalLevelsCompleted);
+
+            // 检查是否有新皮肤可以解锁
+            initSkinData();
+        }
+
+        // 渲染主菜单皮肤选择界面
+        function renderSkinSelectScreen() {
+            const skinGrid = document.getElementById('skinGrid');
+            skinGrid.innerHTML = '';
+
+            skins.forEach(skin => {
+                const skinItem = document.createElement('div');
+                skinItem.className = `skin-item ${skin.unlocked ? 'unlocked' : ''} ${skin.id === skinData.currentSkin ? 'selected' : ''}`;
+                skinItem.onclick = () => {
+                    if (skin.unlocked) {
+                        applySkin(skin.id);
+                    }
+                };
+
+                const unlockText = skin.unlocked 
+                    ? '已解锁' 
+                    : skin.unlockCondition;
+
+                skinItem.innerHTML = `
+                    <div class="skin-preview" style="background-color: ${skin.color};"></div>
+                    <div class="skin-name">${skin.name}</div>
+                    <div class="skin-unlock-condition">${unlockText}</div>
+                    <div class="skin-effects" style="font-size:10px;margin-top:5px;">${skin.effectsDesc}</div>
+                    ${skin.id === skinData.currentSkin ? '<div class="current-skin-indicator">当前</div>' : ''}
+                `;
+
+                skinGrid.appendChild(skinItem);
+            });
+        }
+
+        // 显示皮肤选择界面
+        function showSkinSelect() {
+            showTransition();
+            setTimeout(() => {
+                renderSkinSelectScreen();
+                skinSelectScreen.style.display = 'block';
+                startScreen.style.display = 'none';
+                levelSelectScreen.style.display = 'none';
+                winScreen.style.display = 'none';
+                hideTransition();
+            }, 300);
+        }
 
         // 初始化关卡按钮
         function initLevelButtons() {
@@ -251,6 +829,18 @@
             });
         }
 
+        // 更新生命值显示
+        function updateHealthDisplay() {
+            const totalHealth = playerHealth + (player.extraHealth || 0);
+            for (let i = 0; i < hearts.length; i++) {
+                if (i < totalHealth) {
+                    hearts[i].classList.remove('empty');
+                } else {
+                    hearts[i].classList.add('empty');
+                }
+            }
+        }
+
         // 加载关卡
         function loadLevel(levelIndex) {
             if (!unlockedLevels[levelIndex]) return;
@@ -264,19 +854,33 @@
                 platforms = currentLevelData.platforms;
                 spikes = currentLevelData.spikes;
                 coins = currentLevelData.coins.map(coin => ({...coin, collected: false}));
+                monsters = JSON.parse(JSON.stringify(currentLevelData.monsters));
                 coinCount = 0;
                 gameState = 'playing';
+                playerInvulnerable = false;
+                invulnerableTimer = 0;
+                playerHealth = 3;
+                coinAnimationFrames = [];
+                particles = [];
+                celebrationParticles = [];
+                jumpParticleCooldown = 0;
                 
-                // 重置角色
+                // 重置角色位置，保留皮肤属性
                 player.x = 50;
                 player.y = 410;
                 player.velocityY = 0;
                 player.onGround = false;
                 
+                // 更新生命值显示
+                updateHealthDisplay();
+                
                 // 隐藏界面
                 startScreen.style.display = 'none';
                 levelSelectScreen.style.display = 'none';
                 winScreen.style.display = 'none';
+                skinSelectScreen.style.display = 'none';
+                inGameSkinPanel.classList.remove('active');
+                showSkinPanel = false;
                 
                 hideTransition();
             }, 500);
@@ -287,35 +891,75 @@
             loadLevel(currentLevel);
         }
 
+        // 玩家受伤处理
+        function playerHurt() {
+            if (playerInvulnerable) return;
+            
+            playerHealth--;
+            playerInvulnerable = true;
+            // 应用皮肤的额外无敌时间
+            invulnerableTimer = 60 + (player.extraInvulnerability || 0);
+            updateHealthDisplay();
+            
+            // 生成受伤血花粒子
+            createBloodParticles(player.x + player.size/2, player.y + player.size/2);
+            
+            if (playerHealth <= 0) {
+                gameState = 'lose';
+            }
+        }
+
         // 转场效果
         function showTransition() {
             transition.style.opacity = 1;
+            transition.style.pointerEvents = 'auto';
         }
         function hideTransition() {
             setTimeout(() => {
                 transition.style.opacity = 0;
+                transition.style.pointerEvents = 'none';
             }, 100);
         }
 
         // 界面切换
         function showStartScreen() {
-            startScreen.style.display = 'block';
-            levelSelectScreen.style.display = 'none';
-            winScreen.style.display = 'none';
+            showTransition();
+            setTimeout(() => {
+                startScreen.style.display = 'block';
+                levelSelectScreen.style.display = 'none';
+                winScreen.style.display = 'none';
+                skinSelectScreen.style.display = 'none';
+                inGameSkinPanel.classList.remove('active');
+                showSkinPanel = false;
+                hideTransition();
+            }, 300);
         }
         function showLevelSelect() {
-            initLevelButtons();
-            levelSelectScreen.style.display = 'block';
-            startScreen.style.display = 'none';
-            winScreen.style.display = 'none';
+            showTransition();
+            setTimeout(() => {
+                initLevelButtons();
+                levelSelectScreen.style.display = 'block';
+                startScreen.style.display = 'none';
+                winScreen.style.display = 'none';
+                skinSelectScreen.style.display = 'none';
+                inGameSkinPanel.classList.remove('active');
+                showSkinPanel = false;
+                hideTransition();
+            }, 300);
         }
 
-        // 键盘控制（已移除F键全屏功能）
+        // 键盘控制（新增S键打开皮肤面板）
         document.addEventListener('keydown', e => {
             keys[e.key] = true;
+            
             // R键重新开始
             if ((e.key === 'r' || e.key === 'R') && gameState !== 'menu') {
                 replayCurrentLevel();
+            }
+            
+            // S键打开/关闭皮肤面板
+            if (e.key === 's' || e.key === 'S') {
+                toggleSkinPanel();
             }
         });
         document.addEventListener('keyup', e => keys[e.key] = false);
@@ -334,11 +978,166 @@
             return platform ? platform.y : 0;
         }
 
+        // 更新怪兽移动逻辑
+        function updateMonsters() {
+            if (gameState !== 'playing') return;
+            
+            monsters.forEach(monster => {
+                monster.x += monster.speed * monster.direction;
+                
+                if (monster.x <= monster.minX) {
+                    monster.direction = 1;
+                } else if (monster.x >= monster.maxX - monster.size) {
+                    monster.direction = -1;
+                }
+                
+                const playerHitbox = {x: player.x, y: player.y, w: player.size, h: player.size};
+                const monsterHitbox = {x: monster.x, y: monster.y, w: monster.size, h: monster.size};
+                
+                if (rectCollision(playerHitbox, monsterHitbox)) {
+                    playerHurt();
+                }
+            });
+        }
+
+        // 添加金币收集动画
+        function addCoinAnimation(x, y) {
+            coinAnimationFrames.push({
+                x: x,
+                y: y,
+                size: 8,
+                frame: 0,
+                maxFrames: 15
+            });
+        }
+
+        // 更新金币动画
+        function updateCoinAnimations() {
+            for (let i = coinAnimationFrames.length - 1; i >= 0; i--) {
+                const anim = coinAnimationFrames[i];
+                anim.frame++;
+                anim.y -= 2;
+                anim.size *= 0.9;
+                
+                if (anim.frame >= anim.maxFrames) {
+                    coinAnimationFrames.splice(i, 1);
+                }
+            }
+        }
+
+        // 粒子系统
+        function createJumpParticles(x, y) {
+            if (jumpParticleCooldown > 0) return;
+            
+            jumpParticleCooldown = 15;
+            const particleCount = 5;
+            
+            // 获取当前皮肤的跳跃粒子颜色
+            const currentSkin = skins.find(s => s.id === player.skin);
+            const particleColor = currentSkin && currentSkin.specialEffect === 'jumpParticles' 
+                ? currentSkin.color 
+                : '#8B4513';
+            
+            for (let i = 0; i < particleCount; i++) {
+                particles.push({
+                    x: x + player.size/2,
+                    y: y + player.size,
+                    size: Math.random() * 3 + 1,
+                    speedX: (Math.random() - 0.5) * 2,
+                    speedY: Math.random() * -1,
+                    life: 30,
+                    color: particleColor,
+                    type: 'jump'
+                });
+            }
+        }
+
+        function createBloodParticles(x, y) {
+            const particleCount = 15;
+            
+            for (let i = 0; i < particleCount; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    size: Math.random() * 4 + 2,
+                    speedX: (Math.random() - 0.5) * 6,
+                    speedY: (Math.random() - 0.5) * 6,
+                    life: 45,
+                    color: '#FF0000',
+                    type: 'blood'
+                });
+            }
+        }
+
+        function createCelebrationParticles() {
+            celebrationParticles = [];
+            const particleCount = 100;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFFFFF'];
+                celebrationParticles.push({
+                    x: Math.random() * originalWidth,
+                    y: -10,
+                    size: Math.random() * 5 + 2,
+                    speedY: Math.random() * 3 + 1,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    life: originalHeight / (Math.random() * 3 + 1) + 10
+                });
+            }
+        }
+
+        function updateParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.speedX;
+                p.y += p.speedY;
+                p.life--;
+                
+                if (p.type === 'jump') {
+                    p.speedY += 0.1;
+                }
+                
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+            
+            for (let i = celebrationParticles.length - 1; i >= 0; i--) {
+                const p = celebrationParticles[i];
+                p.y += p.speedY;
+                p.life--;
+                
+                if (p.life <= 0) {
+                    celebrationParticles.splice(i, 1);
+                }
+            }
+            
+            if (jumpParticleCooldown > 0) {
+                jumpParticleCooldown--;
+            }
+        }
+
         // 更新角色
         function updatePlayer() {
-            if (gameState !== 'playing') return;
+            if (gameState !== 'playing') {
+                if (gameState === 'win' && celebrationParticles.length < 50) {
+                    createCelebrationParticles();
+                }
+                return;
+            }
 
-            // 水平移动 + 禁止穿墙
+            updateMonsters();
+
+            if (playerInvulnerable) {
+                invulnerableTimer--;
+                if (invulnerableTimer <= 0) {
+                    playerInvulnerable = false;
+                }
+            }
+
+            updateCoinAnimations();
+            updateParticles();
+
             let moveX = 0;
             if (keys['ArrowLeft']) moveX = -player.speed;
             if (keys['ArrowRight']) moveX = player.speed;
@@ -346,21 +1145,24 @@
             const futureX = player.x + moveX;
             const playerRectX = {x: futureX, y: player.y, w: player.size, h: player.size};
             let canMoveX = true;
+            
+            if (futureX < 0 || futureX + player.size > originalWidth) {
+                canMoveX = false;
+            }
             platforms.forEach(p => {
                 if (rectCollision(playerRectX, p)) canMoveX = false;
             });
+            
             if (canMoveX) player.x = futureX;
 
-            // 跳跃
             if (keys['ArrowUp'] && player.onGround) {
                 player.velocityY = -player.jumpPower;
                 player.onGround = false;
+                createJumpParticles(player.x, player.y);
             }
 
-            // 重力
             player.velocityY += player.gravity;
             
-            // 垂直移动 + 禁止穿墙
             const futureY = player.y + player.velocityY;
             const playerRectY = {x: player.x, y: futureY, w: player.size, h: player.size};
             let canMoveY = true;
@@ -382,7 +1184,6 @@
                 player.onGround = false;
             }
 
-            // 金币收集
             coins.forEach(coin => {
                 if (!coin.collected && rectCollision(
                     {x: player.x, y: player.y, w: player.size, h: player.size},
@@ -390,28 +1191,40 @@
                 )) {
                     coin.collected = true;
                     coinCount++;
+                    addCoinAnimation(coin.x, coin.y);
                 }
             });
 
-            // 尖刺碰撞
-            const playerHitbox = {x: player.x + 1, y: player.y + 1, w: player.size - 2, h: player.size - 2};
+            const playerHitbox = {x: player.x + 2, y: player.y + 2, w: player.size - 4, h: player.size - 4};
             spikes.forEach(s => {
-                const platformY = getPlatformY(s.platformId);
+                const platform = platforms.find(p => p.id === s.platformId);
+                if (!platform) return;
+                const platformY = platform.y;
+                const platformW = platform.w;
+                
                 for (let i=0; i<s.count; i++) {
-                    const spikeX = s.x + i*s.size;
-                    const spikeHitbox = {x: spikeX + 2, y: platformY - s.size + 5, w: s.size - 4, h: s.size - 5};
+                    const spikeX = s.x + i * s.size;
+                    if (spikeX < platform.x || spikeX + s.size > platform.x + platformW) continue;
+                    
+                    const spikeHitbox = {
+                        x: spikeX + 1, 
+                        y: platformY - s.size + 2, 
+                        w: s.size - 2, 
+                        h: s.size - 2
+                    };
+                    
                     if (rectCollision(playerHitbox, spikeHitbox)) {
-                        gameState = 'lose';
+                        playerHurt();
                     }
                 }
             });
 
-            // 边界检测
             if (player.y > canvas.height + 50) {
                 gameState = 'lose';
+                // 保存收集的金币数量
+                saveSkinStats(coinCount, false);
             }
 
-            // 统一通关逻辑
             const totalCoins = coins.length;
             const endPlatform = platforms.find(p => p.id === 7);
             const playerRect = {x: player.x, y: player.y, w: player.size, h: player.size};
@@ -424,78 +1237,227 @@
 
             if (gameState === 'playing' && coinCount === totalCoins && rectCollision(playerRect, endPlatformRect)) {
                 gameState = 'win';
+                createCelebrationParticles();
                 if (currentLevel + 1 < levelsData.length) {
                     unlockedLevels[currentLevel + 1] = true;
                     localStorage.setItem('unlockedLevels', JSON.stringify(unlockedLevels));
                 }
                 winMessage.textContent = `第${currentLevel + 1}关所有金币已收集，挑战成功！`;
-                nextLevelBtn.textContent = currentLevel + 1 < levelsData.length ? '下一关' : '返回主菜单';
-                nextLevelBtn.onclick = currentLevel + 1 < levelsData.length ? () => loadLevel(currentLevel + 1) : showStartScreen;
+                
+                // 保存关卡完成数据
+                saveSkinStats(coinCount, true);
+                
+                if (currentLevel + 1 < levelsData.length) {
+                    nextLevelBtn.textContent = '下一关';
+                    nextLevelBtn.onclick = () => loadLevel(currentLevel + 1);
+                    nextLevelBtn.disabled = false;
+                } else {
+                    nextLevelBtn.textContent = '返回主菜单';
+                    nextLevelBtn.onclick = showStartScreen;
+                }
                 winScreen.style.display = 'block';
             }
         }
 
         // 绘制游戏
         function drawGame() {
-            // 清空画布
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 背景
-            ctx.fillStyle = currentLevelData.bgColor;
+            if (currentLevelData.bgGradient) {
+                const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                gradient.addColorStop(0, currentLevelData.bgColor);
+                gradient.addColorStop(1, '#ffffff');
+                ctx.fillStyle = gradient;
+            } else {
+                ctx.fillStyle = currentLevelData.bgColor;
+            }
             ctx.fillRect(0, 0, originalWidth, originalHeight);
 
-            // 平台
             platforms.forEach(p => {
                 ctx.fillStyle = p.color || '#000';
                 ctx.fillRect(p.x, p.y, p.w, p.h);
-                // 终点平台文字标记
+                
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(p.x, p.y, p.w, p.h);
+                
                 if (p.id === 7) {
                     ctx.fillStyle = '#fff';
                     ctx.font = '12px Courier New';
                     ctx.fillText('终点', p.x + 5, p.y + 15);
+                    
+                    if (Math.floor(Date.now() / 500) % 2 === 0) {
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                        ctx.fillRect(p.x, p.y, p.w, p.h);
+                    }
                 }
             });
 
-            // 尖刺
-            ctx.fillStyle = '#000';
+            ctx.fillStyle = '#d32f2f';
             spikes.forEach(s => {
-                const platformY = getPlatformY(s.platformId);
+                const platform = platforms.find(p => p.id === s.platformId);
+                if (!platform) return;
+                const platformY = platform.y;
+                const platformW = platform.w;
                 for (let i=0; i<s.count; i++) {
                     const x = s.x + i*s.size;
-                    ctx.beginPath();
-                    ctx.moveTo(x + s.size/2, platformY - s.size);
-                    ctx.lineTo(x, platformY);
-                    ctx.lineTo(x + s.size, platformY);
-                    ctx.fill();
+                    if (x >= platform.x && x + s.size <= platform.x + platformW) {
+                        ctx.beginPath();
+                        ctx.moveTo(x + s.size/2, platformY - s.size);
+                        ctx.lineTo(x, platformY);
+                        ctx.lineTo(x + s.size, platformY);
+                        ctx.fill();
+                        
+                        ctx.fillStyle = '#b71c1c';
+                        ctx.beginPath();
+                        ctx.moveTo(x + s.size/2, platformY - s.size + 2);
+                        ctx.lineTo(x + 2, platformY);
+                        ctx.lineTo(x + s.size - 2, platformY);
+                        ctx.fill();
+                        ctx.fillStyle = '#d32f2f';
+                    }
                 }
             });
 
-            // 金币
-            ctx.fillStyle = '#ff0';
+            ctx.fillStyle = '#ffd700';
             coins.forEach(coin => {
-                if (!coin.collected) ctx.fillRect(coin.x, coin.y, coin.size, coin.size);
+                if (!coin.collected) {
+                    if (Math.floor(Date.now() / 300) % 2 === 0) {
+                        ctx.fillStyle = '#ffff00';
+                    } else {
+                        ctx.fillStyle = '#ffd700';
+                    }
+                    ctx.fillRect(coin.x, coin.y, coin.size, coin.size);
+                    
+                    ctx.strokeStyle = '#ff8c00';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(coin.x, coin.y, coin.size, coin.size);
+                }
             });
 
-            // 角色
-            ctx.fillStyle = '#000';
-            ctx.fillRect(player.x, player.y, player.size, player.size);
-            ctx.fillStyle = '#fff';
-            ctx.font = '8px Courier New';
-            ctx.fillText('c', player.x + 3, player.y + 9);
+            coinAnimationFrames.forEach(anim => {
+                ctx.fillStyle = 'rgba(255, 215, 0, ' + (1 - anim.frame / anim.maxFrames) + ')';
+                ctx.fillRect(anim.x, anim.y, anim.size, anim.size);
+            });
 
-            // 关卡信息
+            monsters.forEach(monster => {
+                ctx.fillStyle = monster.color;
+                ctx.fillRect(monster.x, monster.y, monster.size, monster.size);
+                
+                ctx.fillStyle = '#c0392b';
+                ctx.fillRect(monster.x + 2, monster.y + 2, monster.size, monster.size);
+                
+                ctx.fillStyle = monster.color;
+                ctx.fillRect(monster.x, monster.y, monster.size, monster.size - 2);
+                
+                ctx.fillStyle = '#fff';
+                if (monster.direction === 1) {
+                    ctx.fillRect(monster.x + 6, monster.y + 3, 3, 3);
+                    ctx.fillRect(monster.x + 10, monster.y + 3, 3, 3);
+                } else {
+                    ctx.fillRect(monster.x + 3, monster.y + 3, 3, 3);
+                    ctx.fillRect(monster.x + 7, monster.y + 3, 3, 3);
+                }
+                
+                ctx.fillStyle = '#000';
+                if (monster.direction === 1) {
+                    ctx.fillRect(monster.x + 7, monster.y + 4, 1, 1);
+                    ctx.fillRect(monster.x + 11, monster.y + 4, 1, 1);
+                } else {
+                    ctx.fillRect(monster.x + 4, monster.y + 4, 1, 1);
+                    ctx.fillRect(monster.x + 8, monster.y + 4, 1, 1);
+                }
+                
+                ctx.fillStyle = '#000';
+                ctx.fillRect(monster.x + 3, monster.y + 8, 8, 3);
+            });
+
+            // 角色绘制 - 适配皮肤特殊效果
+            if (!playerInvulnerable || Math.floor(Date.now() / 100) % 2 === 0) {
+                const currentSkin = skins.find(s => s.id === player.skin);
+                
+                // 幽灵皮肤半透明效果
+                if (currentSkin && currentSkin.specialEffect === 'ghost') {
+                    ctx.globalAlpha = 0.7;
+                }
+                
+                ctx.fillStyle = player.color;
+                ctx.fillRect(player.x, player.y, player.size, player.size);
+                
+                // 角色阴影
+                ctx.fillStyle = currentSkin ? darkenColor(currentSkin.color) : '#000080';
+                ctx.fillRect(player.x + 2, player.y + 2, player.size, player.size);
+                
+                // 角色主体（上层）
+                ctx.fillStyle = player.color;
+                ctx.fillRect(player.x, player.y, player.size, player.size - 2);
+                
+                // 角色眼睛
+                ctx.fillStyle = '#fff';
+                const eyeOffset = player.size === 10 ? 2 : 3;
+                const eyeSize = player.size === 14 ? 4 : 3;
+                ctx.fillRect(player.x + eyeOffset, player.y + eyeOffset, eyeSize, eyeSize);
+                ctx.fillRect(player.x + (player.size - eyeOffset - eyeSize), player.y + eyeOffset, eyeSize, eyeSize);
+                
+                // 角色眼珠
+                ctx.fillStyle = '#000';
+                ctx.fillRect(player.x + eyeOffset + 1, player.y + eyeOffset + 1, 1, 1);
+                ctx.fillRect(player.x + (player.size - eyeOffset - eyeSize) + 1, player.y + eyeOffset + 1, 1, 1);
+                
+                // 恢复透明度
+                if (currentSkin && currentSkin.specialEffect === 'ghost') {
+                    ctx.globalAlpha = 1.0;
+                }
+            }
+
+            // 绘制粒子系统
+            particles.forEach(p => {
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x, p.y, p.size, p.size);
+            });
+            
+            celebrationParticles.forEach(p => {
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x, p.y, p.size, p.size);
+            });
+
+            // 关卡信息 - 美化显示
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.fillRect(10, 10, 220, 30);
             ctx.fillStyle = '#90f';
             ctx.font = '16px Courier New';
             ctx.fillText(`关卡 ${currentLevel + 1} | 金币 ${coinCount} / ${coins.length}`, 20, 30);
 
-            // 失败提示
+            // 皮肤信息显示
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.fillRect(10, 45, 220, 30);
+            const currentSkin = skins.find(s => s.id === player.skin);
+            ctx.fillStyle = currentSkin ? currentSkin.color : '#90f';
+            ctx.font = '16px Courier New';
+            ctx.fillText(`皮肤: ${currentSkin ? currentSkin.name : '默认'}`, 20, 65);
+
+            // 失败提示 - 美化
             if (gameState === 'lose') {
-                ctx.fillStyle = '#000';
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                ctx.fillRect(originalWidth/2 - 100, originalHeight/2 - 40, 200, 80);
+                ctx.fillStyle = '#ff2a6d';
                 ctx.font = '24px Courier New';
                 ctx.fillText('GAME OVER', originalWidth/2 - 70, originalHeight/2);
+                ctx.fillStyle = '#fff';
                 ctx.font = '16px Courier New';
                 ctx.fillText('Press R to Restart', originalWidth/2 - 65, originalHeight/2 + 30);
             }
+        }
+
+        // 辅助函数：加深颜色（用于角色阴影）
+        function darkenColor(color) {
+            if (color === '#00f') return '#000080';
+            if (color === '#f00') return '#800000';
+            if (color === '#ff0') return '#808000';
+            if (color === '#0f0') return '#008000';
+            if (color === '#a0f') return '#500080';
+            if (color === '#f80') return '#804000';
+            return '#000080';
         }
 
         // 游戏循环
@@ -507,6 +1469,8 @@
 
         // 初始化
         initLevelButtons();
+        initSkinData(); // 初始化皮肤系统
+        updateHealthDisplay();
         gameLoop();
     </script>
 </body>
